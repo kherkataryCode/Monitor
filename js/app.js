@@ -18,11 +18,9 @@
   const scrollPos = {};
   let lastMod = 'tender';
 
-  /** The module the user is working in: the current page's module, else the last one used. */
   TMD.activeModule = function () { return TMD.modules[PAGE_MOD[TMD.state.page] || lastMod] || TMD.modules.tender; };
   TMD.pageModule = (page) => PAGE_MOD[page] || null;
 
-  /* ---------------- Theme ---------------- */
   function applyTheme() {
     const t = TMD.settings.get('theme');
     const dark = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -36,7 +34,6 @@
     }
   }
 
-  /* ---------------- Sidebar (rail by default) ---------------- */
   const narrow = () => window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
   function setNav(open, persist) {
     document.body.classList.toggle('nav-expanded', open);
@@ -49,15 +46,14 @@
   function bindSidebarHover() {
     const sideNav = TMD.$('#sideNav');
     if (!sideNav) return;
-    sideNav.addEventListener('mouseenter', () => {
+    sideNav.addEventListener('pointerenter', () => {
       if (!narrow()) setNav(true, false);
     });
-    sideNav.addEventListener('mouseleave', () => {
+    sideNav.addEventListener('pointerleave', () => {
       if (!narrow()) setNav(false, false);
     });
   }
 
-  /* ---------------- Header ---------------- */
   function updateHeader() {
     const page = TMD.state.page;
     const pm = PAGE_MOD[page];
@@ -92,7 +88,6 @@
     updateFab();
   }
 
-  /* ---------------- Floating edit control (bottom-left) ---------------- */
   function updateFab() {
     const fab = TMD.$('#editFab');
     const pm = PAGE_MOD[TMD.state.page];
@@ -117,7 +112,6 @@
       </div>`;
   }
 
-  /* ---------------- Routing ---------------- */
   TMD.go = function (page) {
     if (('#' + page) === location.hash) route(); else location.hash = page;
   };
@@ -187,7 +181,6 @@
     });
   }
 
-  /* ---------------- Import dialog ---------------- */
   async function chooseModule() {
     return TMD.modal({
       title: 'Import into which module?',
@@ -248,7 +241,6 @@
     if (TMD.state.page !== 'home' && PAGE_MOD[TMD.state.page] !== mid) TMD.go(M.pages[0]);
   }
 
-  /* ---------------- Startup data (each module restored independently) ---------------- */
   function installPayload(M, p) {
     M.audit.load(p.audit || []);
     const wb = p.workbook;
@@ -292,7 +284,6 @@
     if (restored.length) TMD.toast(`Restored local working copy — ${restored.join(' · ')}`, 'info', 4500);
   }
 
-  /* ---------------- Init ---------------- */
   async function init() {
     const d = new Date();
     TMD.state.sessionId = `S-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${TMD.randomHex(3)}`;
@@ -304,7 +295,6 @@
     TMD.initCyberDashboard(); TMD.initCyberAlerts();
     TMD.initDataQuality(); TMD.initSettings(); TMD.initAuditPage();
 
-    // Header buttons
     TMD.$('#btnImport').addEventListener('click', () => TMD.openImport());
     TMD.$('#btnRefresh').addEventListener('click', () => {
       TMD.recalcAll(); TMD.filters.apply(); TMD.cyberRecalcAll(); TMD.cyber.filters.apply();
@@ -329,7 +319,6 @@
       const b = e.target.closest('[data-empty-demo]'); if (b) loadDemoFor(b.dataset.emptyDemo);
     });
 
-    // Floating edit control
     TMD.$('#editFab').addEventListener('click', (e) => {
       const b = e.target.closest('[data-f]');
       if (!b) return;
@@ -342,7 +331,6 @@
       if (f === 'lock') M.edit.cancel();
     });
 
-    // File input + global drag & drop (imports into the current module; asks on shared pages)
     TMD.$('#fileInput').addEventListener('change', (e) => { const f = e.target.files[0]; e.target.value = ''; if (TMD._closeImport) TMD._closeImport(null); if (f) TMD.importFile(f, TMD.modules[importMod]); });
     let dragDepth = 0;
     const hasFiles = (e) => e.dataTransfer && Array.from(e.dataTransfer.types || []).indexOf('Files') >= 0;
@@ -364,7 +352,6 @@
       if (mid) TMD.importFile(f, TMD.modules[mid]);
     });
 
-    // Events
     const modOf = (e) => (e && e.module) || 'tender';
     TMD.on('data', (e) => {
       const M = TMD.modules[modOf(e)];
@@ -404,7 +391,6 @@
     window.addEventListener('hashchange', route);
     window.addEventListener('resize', TMD.debounce ? TMD.debounce(() => { if (!narrow()) TMD.$('#navScrim').hidden = true; }, 150) : () => {});
 
-    // Midnight rollover: recalculate when the date changes while the app stays open
     let lastDay = TMD.isoDate(TMD.today());
     setInterval(() => {
       const now = TMD.isoDate(TMD.today());
