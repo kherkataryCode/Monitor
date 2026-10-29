@@ -1,0 +1,39 @@
+/* =====================================================================
+ * print.css — print / "Save as PDF" layouts (browser's local print).
+ * ===================================================================== */
+@page { size: A4 landscape; margin: 10mm; }
+html, body { background: #fff !important; color: #111 !important; overflow: visible !important; height: auto !important; }
+.app-header, .side-nav, .filter-bar .fb-row .btn, .seg, .adv-filters, .toast-host, .tooltip, .popover-host, .modal-host, .drawer, .scrim,
+.drop-overlay, .progress-overlay, .card-tools, .page-actions, .demo-banner .btn, .no-print, .skip-link { display: none !important; }
+.app-body { display: block !important; height: auto !important; }
+.main { overflow: visible !important; height: auto !important; }
+.filter-bar { position: static !important; border: 0 !important; background: none !important; padding: 0 0 6px !important; }
+.filter-bar .search-box { display: none !important; }
+.card, .kpi { box-shadow: none !important; break-inside: avoid; }
+.kpi { border: 1px solid #ccc !important; }
+.chart-grid { grid-template-columns: repeat(2, 1fr) !important; }
+.chart-card.wide { grid-column: span 2 !important; }
+.chart-card { break-inside: avoid; }
+.page[hidden] { display: none !important; }
+
+/* Dashboard print */
+body.printing-dashboard .page:not(#page-dashboard) { display: none !important; }
+
+/* Custom print documents (register table, details, management summary) */
+body.printing-custom .app-body, body.printing-custom .demo-banner { display: none !important; }
+body.printing-custom .print-host { display: block !important; }
+body.printing-custom .summary-view { position: static !important; overflow: visible !important; background: #fff !important; }
+body.printing-custom .summary-doc { box-shadow: none !important; margin: 0 !important; padding: 0 !important; max-width: none !important; }
+.print-host { display: none; }
+.print-doc h1 { font-size: 16pt; margin: 0 0 4px; color: #0f3d75; }
+.print-doc p { margin: 0 0 8px; color: #444; font-size: 9pt; }
+.print-table { border-collapse: collapse; width: 100%; font-size: 7.5pt; }
+.print-table th, .print-table td { border: 1px solid #bbb; padding: 2px 4px; vertical-align: top; text-align: left; }
+.print-table th { background: #eef2f7; }
+.print-table tr { break-inside: avoid; }
+.print-doc .dr-sec h3 { color: #0f3d75; border-bottom: 1px solid #999; font-size: 11pt; }
+.print-doc .f-row { display: grid; grid-template-columns: 45mm 1fr; border-bottom: 1px dotted #ccc; padding: 2px 0; font-size: 9pt; }
+.print-doc .stepper { display: flex; list-style: none; padding: 0; font-size: 7pt; }
+.print-doc .stepper li { flex: 1; text-align: center; }
+.print-doc .badge, .print-doc .pill { border: 1px solid #999; }
+mark { background: none !important; }

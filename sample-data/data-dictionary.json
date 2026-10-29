@@ -1,0 +1,2199 @@
+{
+  "title": "Tender Monitoring Dashboard — data dictionary",
+  "generated": "2026-10-29",
+  "notes": [
+    "Source columns are preserved exactly (labels, order, blanks). Duplicate headers receive internal keys with _1, _2 suffixes; the original header text is displayed and exported.",
+    "Standard fields are an analytical mapping layer. Mappings can be changed per worksheet layout under Settings → Column mapping.",
+    "Calculated fields are never written into source columns. They can optionally be exported as extra \"[Calc]\" columns.",
+    "Dates: dd/mm/yyyy and dd-mm-yyyy (default reading when both parts ≤ 12), mm/dd/yyyy only when the day part is > 12, \"31 Aug 2026\", ISO, and Excel serial numbers in date columns."
+  ],
+  "standardFields": [
+    {
+      "field": "srNo",
+      "label": "SR No",
+      "type": "text",
+      "description": "Serial number of the row in the tracker."
+    },
+    {
+      "field": "channel",
+      "label": "Procurement Channel (P&CS / CPO)",
+      "type": "cat",
+      "description": "Procurement channel handling the tender (P&CS or CPO)."
+    },
+    {
+      "field": "department",
+      "label": "Department",
+      "type": "cat",
+      "description": "Owning department (e.g. INSTR, ELECTRICAL)."
+    },
+    {
+      "field": "capexRevex",
+      "label": "CAPEX / REVEX",
+      "type": "cat",
+      "description": "Budget head: CAPEX or REVEX."
+    },
+    {
+      "field": "initiator",
+      "label": "Tender Initiator",
+      "type": "cat",
+      "description": "Person who initiated the tender."
+    },
+    {
+      "field": "wbs",
+      "label": "WBS No",
+      "type": "id",
+      "description": "SAP WBS element (CAPEX). Kept as text."
+    },
+    {
+      "field": "projectCost",
+      "label": "Project Cost",
+      "type": "amount",
+      "description": "Sanctioned project cost (unit per header or Settings; default lakh)."
+    },
+    {
+      "field": "be",
+      "label": "BE (Budget Estimate)",
+      "type": "amount",
+      "description": "Budget estimate for the financial year."
+    },
+    {
+      "field": "capexFinish",
+      "label": "CAPEX Finish Date",
+      "type": "date",
+      "description": "Target date for completion of CAPEX."
+    },
+    {
+      "field": "prNo",
+      "label": "PR No",
+      "type": "id",
+      "description": "Purchase requisition number (first PR No column). Kept as text."
+    },
+    {
+      "field": "prNo2",
+      "label": "PR No (2nd column)",
+      "type": "id",
+      "description": "Second \"PR No\" column in the CAPEX tracker (duplicate header retained)."
+    },
+    {
+      "field": "prSentDate",
+      "label": "PR Sent Date",
+      "type": "date",
+      "description": "Date the PR was sent."
+    },
+    {
+      "field": "proposalName",
+      "label": "Proposal Name",
+      "type": "longtext",
+      "description": "Name of the CAPEX proposal."
+    },
+    {
+      "field": "jobDescription",
+      "label": "Job Description",
+      "type": "longtext",
+      "description": "Description of the job / supply."
+    },
+    {
+      "field": "status",
+      "label": "STATUS",
+      "type": "longtext",
+      "description": "Free-text status as maintained by the user. Never overwritten."
+    },
+    {
+      "field": "crfq",
+      "label": "CRFQ / GeM ID",
+      "type": "id",
+      "description": "CRFQ number or GeM bid ID. Kept as text."
+    },
+    {
+      "field": "sentToProcurement",
+      "label": "Sent to Concerned CPO/P&CS",
+      "type": "milestone",
+      "description": "Date (or note) when sent to the concerned CPO / P&CS."
+    },
+    {
+      "field": "floatDate",
+      "label": "Tender Floating Date",
+      "type": "date",
+      "description": "Date the tender was floated."
+    },
+    {
+      "field": "floatDuration",
+      "label": "Tender Floating Duration (days)",
+      "type": "number",
+      "description": "Source value: tender floating duration in days."
+    },
+    {
+      "field": "prebidDate",
+      "label": "Pre-Bid Meeting Date",
+      "type": "date",
+      "description": "Pre-bid meeting date."
+    },
+    {
+      "field": "openingDate",
+      "label": "Tender / Bid Opening Date",
+      "type": "date",
+      "description": "Scheduled tender / bid opening date."
+    },
+    {
+      "field": "actualOpeningDate",
+      "label": "Actual Tender Opening Date",
+      "type": "date",
+      "description": "Actual tender opening date."
+    },
+    {
+      "field": "techEvalDate",
+      "label": "BQC & Technical Evaluation Date",
+      "type": "date",
+      "description": "BQC & technical evaluation completion date."
+    },
+    {
+      "field": "techEvalDuration",
+      "label": "Technical Evaluation Duration (days)",
+      "type": "number",
+      "description": "Source value: technical evaluation duration in days."
+    },
+    {
+      "field": "priceBidDate",
+      "label": "Price Bid Opened On",
+      "type": "date",
+      "description": "Date the price bid was opened."
+    },
+    {
+      "field": "tecApprovalDate",
+      "label": "TEC Approval Date",
+      "type": "date",
+      "description": "Tender Evaluation Committee approval date."
+    },
+    {
+      "field": "fat",
+      "label": "FAT",
+      "type": "milestone",
+      "description": "Factory Acceptance Test date or status."
+    },
+    {
+      "field": "sat",
+      "label": "SAT",
+      "type": "milestone",
+      "description": "Site Acceptance Test date or status."
+    },
+    {
+      "field": "installation",
+      "label": "Installation",
+      "type": "milestone",
+      "description": "Installation / commissioning date or status."
+    },
+    {
+      "field": "poNo",
+      "label": "PO / OLA No",
+      "type": "id",
+      "description": "PO / OLA number. Kept as text."
+    },
+    {
+      "field": "awardDate",
+      "label": "PO / OLA Award Date",
+      "type": "date",
+      "description": "PO / OLA award date."
+    },
+    {
+      "field": "prToPoDuration",
+      "label": "PR to PO Cycle (days)",
+      "type": "number",
+      "description": "Source value: PR-to-PO cycle in days."
+    },
+    {
+      "field": "sla",
+      "label": "SLA",
+      "type": "text",
+      "description": "Service level / delivery terms."
+    },
+    {
+      "field": "validity",
+      "label": "PO / OLA Validity",
+      "type": "date",
+      "description": "PO / OLA validity (expiry) date."
+    },
+    {
+      "field": "cashOutflowIncl",
+      "label": "Cash Outflow (incl. tax)",
+      "type": "amount",
+      "description": "PO / OLA value including tax (default rupees)."
+    },
+    {
+      "field": "cashOutflowExcl",
+      "label": "Cash Outflow (excl. tax)",
+      "type": "amount",
+      "description": "PO / OLA value excluding tax (default rupees)."
+    },
+    {
+      "field": "cashOutflow",
+      "label": "PO / OLA Cash Outflow",
+      "type": "amount",
+      "description": "PO / OLA cash outflow (default rupees)."
+    },
+    {
+      "field": "vendor",
+      "label": "Vendor",
+      "type": "cat",
+      "description": "Successful vendor / contractor."
+    },
+    {
+      "field": "remarks",
+      "label": "Remarks",
+      "type": "longtext",
+      "description": "Remarks column (REVEX)."
+    },
+    {
+      "field": "remarksAny",
+      "label": "Remarks (if any)",
+      "type": "longtext",
+      "description": "Remarks (if any)."
+    },
+    {
+      "field": "nature",
+      "label": "Nature",
+      "type": "cat",
+      "description": "Nature of work (Supply / Service / Works / Rate contract)."
+    },
+    {
+      "field": "estCost",
+      "label": "Estimated Cost",
+      "type": "amount",
+      "description": "Estimated cost (header states unit, e.g. In Lacs)."
+    },
+    {
+      "field": "handover",
+      "label": "Project Handing Over",
+      "type": "milestone",
+      "description": "Project handing-over date or status."
+    },
+    {
+      "field": "daysSinceFloat",
+      "label": "Days Since Float (source)",
+      "type": "number",
+      "description": "Source snapshot: days since float (Capex Modified)."
+    },
+    {
+      "field": "daysToOpening",
+      "label": "Days to Opening (source)",
+      "type": "number",
+      "description": "Source snapshot: days to opening (Capex Modified)."
+    },
+    {
+      "field": "statusFlag",
+      "label": "Status Flag",
+      "type": "cat",
+      "description": "Source status flag (Capex Modified)."
+    },
+    {
+      "field": "quickStatus",
+      "label": "Quick Status",
+      "type": "cat",
+      "description": "Source quick status (Capex Modified)."
+    }
+  ],
+  "calculatedFields": [
+    {
+      "field": "Current Stage",
+      "description": "Rules-based lifecycle stage (see stages). Structured dates first; STATUS / Quick Status / Remarks text as supporting evidence; manual override possible in Edit Mode."
+    },
+    {
+      "field": "Stage Reason",
+      "description": "Explanation of how the stage was determined, including any data conflict."
+    },
+    {
+      "field": "Delay / Track",
+      "description": "Delayed when any delay alert applies (thresholds in Settings); Closed for completed / cancelled / scrapped / on hold."
+    },
+    {
+      "field": "Next Milestone",
+      "description": "Next expected step for the current stage, with its planned date when known."
+    },
+    {
+      "field": "Next Milestone",
+      "description": "Calculated (text)."
+    },
+    {
+      "field": "Stage Reason",
+      "description": "Calculated (longtext)."
+    },
+    {
+      "field": "Financial Year",
+      "description": "Calculated (text)."
+    },
+    {
+      "field": "Days Since PR Sent",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Days Since Sent to Procurement",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Days Since Tender Float",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Days to Bid Opening",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Tender Floating Duration",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Technical Evaluation Duration",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "PR-to-PO Cycle (days)",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Days Since PO/OLA Award",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Days to PO/OLA Expiry",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Days to CAPEX Finish",
+      "description": "Calculated (int)."
+    },
+    {
+      "field": "Awarded − Estimated (₹)",
+      "description": "Calculated (money)."
+    },
+    {
+      "field": "Awarded vs Estimated (%)",
+      "description": "Calculated (pct)."
+    },
+    {
+      "field": "Tax Component (₹)",
+      "description": "Calculated (money)."
+    },
+    {
+      "field": "Record Completeness (%)",
+      "description": "Calculated (pct)."
+    },
+    {
+      "field": "Data Quality Score",
+      "description": "Calculated (int)."
+    }
+  ],
+  "stages": [
+    {
+      "number": 1,
+      "stage": "Tender Preparation",
+      "group": "Pre-tender",
+      "colour": "grey"
+    },
+    {
+      "number": 2,
+      "stage": "Internal Approval",
+      "group": "Pre-tender",
+      "colour": "grey"
+    },
+    {
+      "number": 3,
+      "stage": "Sent to P&CS/CPO",
+      "group": "Pre-tender",
+      "colour": "blue"
+    },
+    {
+      "number": 4,
+      "stage": "Tender Not Floated",
+      "group": "Pre-tender",
+      "colour": "grey"
+    },
+    {
+      "number": 5,
+      "stage": "Tender Floated",
+      "group": "Bidding",
+      "colour": "teal"
+    },
+    {
+      "number": 6,
+      "stage": "Pre-Bid Stage",
+      "group": "Bidding",
+      "colour": "teal"
+    },
+    {
+      "number": 7,
+      "stage": "Bid Opening Due",
+      "group": "Bidding",
+      "colour": "teal"
+    },
+    {
+      "number": 8,
+      "stage": "Bid Opened",
+      "group": "Evaluation",
+      "colour": "blue"
+    },
+    {
+      "number": 9,
+      "stage": "BQC Evaluation",
+      "group": "Evaluation",
+      "colour": "blue"
+    },
+    {
+      "number": 10,
+      "stage": "Technical Evaluation",
+      "group": "Evaluation",
+      "colour": "blue"
+    },
+    {
+      "number": 11,
+      "stage": "Finance/Commercial Evaluation",
+      "group": "Evaluation",
+      "colour": "purple"
+    },
+    {
+      "number": 12,
+      "stage": "Price Bid Opening",
+      "group": "Evaluation",
+      "colour": "purple"
+    },
+    {
+      "number": 13,
+      "stage": "Negotiation",
+      "group": "Award",
+      "colour": "purple"
+    },
+    {
+      "number": 14,
+      "stage": "TEC Approval",
+      "group": "Award",
+      "colour": "blue"
+    },
+    {
+      "number": 15,
+      "stage": "Award in Progress",
+      "group": "Award",
+      "colour": "blue"
+    },
+    {
+      "number": 16,
+      "stage": "PO/OLA Awarded",
+      "group": "Post-award",
+      "colour": "green"
+    },
+    {
+      "number": 17,
+      "stage": "Drawing Approval",
+      "group": "Post-award",
+      "colour": "blue"
+    },
+    {
+      "number": 18,
+      "stage": "FAT",
+      "group": "Post-award",
+      "colour": "blue"
+    },
+    {
+      "number": 19,
+      "stage": "Material Delivery",
+      "group": "Post-award",
+      "colour": "blue"
+    },
+    {
+      "number": 20,
+      "stage": "SAT",
+      "group": "Post-award",
+      "colour": "blue"
+    },
+    {
+      "number": 21,
+      "stage": "Installation/Commissioning",
+      "group": "Post-award",
+      "colour": "blue"
+    },
+    {
+      "number": 22,
+      "stage": "Completed",
+      "group": "Closed",
+      "colour": "green"
+    },
+    {
+      "number": 23,
+      "stage": "On Hold",
+      "group": "Exception",
+      "colour": "amber"
+    },
+    {
+      "number": 24,
+      "stage": "Cancelled",
+      "group": "Exception",
+      "colour": "red"
+    },
+    {
+      "number": 25,
+      "stage": "Scrapped",
+      "group": "Exception",
+      "colour": "red"
+    },
+    {
+      "number": 26,
+      "stage": "Refloating Required",
+      "group": "Exception",
+      "colour": "orange"
+    },
+    {
+      "number": 27,
+      "stage": "Unknown/Needs Review",
+      "group": "Needs review",
+      "colour": "grey"
+    }
+  ],
+  "sheets": {
+    "Sheet3": {
+      "recognisedAs": "Contract monitoring",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "SR. NO.",
+          "internalKey": "SR_NO",
+          "duplicateHeader": false,
+          "standardField": "srNo",
+          "type": "text",
+          "description": "Serial number of the row in the tracker."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Procurement Channel (P&CS / CPO)",
+          "internalKey": "Procurement_Channel_P_CS_CPO",
+          "duplicateHeader": false,
+          "standardField": "channel",
+          "type": "cat",
+          "description": "Procurement channel handling the tender (P&CS or CPO)."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Department",
+          "internalKey": "Department",
+          "duplicateHeader": false,
+          "standardField": "department",
+          "type": "cat",
+          "description": "Owning department (e.g. INSTR, ELECTRICAL)."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "CAPEX / REVEX",
+          "internalKey": "CAPEX_REVEX",
+          "duplicateHeader": false,
+          "standardField": "capexRevex",
+          "type": "cat",
+          "description": "Budget head: CAPEX or REVEX."
+        },
+        {
+          "order": 5,
+          "column": "E",
+          "sourceHeader": "Tender Initiator",
+          "internalKey": "Tender_Initiator",
+          "duplicateHeader": false,
+          "standardField": "initiator",
+          "type": "cat",
+          "description": "Person who initiated the tender."
+        },
+        {
+          "order": 6,
+          "column": "F",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No",
+          "duplicateHeader": false,
+          "standardField": "prNo",
+          "type": "id",
+          "description": "Purchase requisition number (first PR No column). Kept as text."
+        },
+        {
+          "order": 7,
+          "column": "G",
+          "sourceHeader": "PR sent date",
+          "internalKey": "PR_sent_date",
+          "duplicateHeader": false,
+          "standardField": "prSentDate",
+          "type": "date",
+          "description": "Date the PR was sent."
+        },
+        {
+          "order": 8,
+          "column": "H",
+          "sourceHeader": "Job Description",
+          "internalKey": "Job_Description",
+          "duplicateHeader": false,
+          "standardField": "jobDescription",
+          "type": "longtext",
+          "description": "Description of the job / supply."
+        },
+        {
+          "order": 9,
+          "column": "I",
+          "sourceHeader": "Nature",
+          "internalKey": "Nature",
+          "duplicateHeader": false,
+          "standardField": "nature",
+          "type": "cat",
+          "description": "Nature of work (Supply / Service / Works / Rate contract)."
+        },
+        {
+          "order": 10,
+          "column": "J",
+          "sourceHeader": "Estimated Cost (In Lacs)",
+          "internalKey": "Estimated_Cost_In_Lacs",
+          "duplicateHeader": false,
+          "standardField": "estCost",
+          "type": "amount",
+          "unit": "lakh",
+          "description": "Estimated cost (header states unit, e.g. In Lacs)."
+        },
+        {
+          "order": 11,
+          "column": "K",
+          "sourceHeader": "CRFQ / GeM ID",
+          "internalKey": "CRFQ_GeM_ID",
+          "duplicateHeader": false,
+          "standardField": "crfq",
+          "type": "id",
+          "description": "CRFQ number or GeM bid ID. Kept as text."
+        },
+        {
+          "order": 12,
+          "column": "L",
+          "sourceHeader": "Tender floating date",
+          "internalKey": "Tender_floating_date",
+          "duplicateHeader": false,
+          "standardField": "floatDate",
+          "type": "date",
+          "description": "Date the tender was floated."
+        },
+        {
+          "order": 13,
+          "column": "M",
+          "sourceHeader": "Tender Floating duration in days",
+          "internalKey": "Tender_Floating_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "floatDuration",
+          "type": "number",
+          "description": "Source value: tender floating duration in days."
+        },
+        {
+          "order": 14,
+          "column": "N",
+          "sourceHeader": "Bid opening date",
+          "internalKey": "Bid_opening_date",
+          "duplicateHeader": false,
+          "standardField": "openingDate",
+          "type": "date",
+          "description": "Scheduled tender / bid opening date."
+        },
+        {
+          "order": 15,
+          "column": "O",
+          "sourceHeader": "BQC & Technical evaluation date",
+          "internalKey": "BQC_Technical_evaluation_date",
+          "duplicateHeader": false,
+          "standardField": "techEvalDate",
+          "type": "date",
+          "description": "BQC & technical evaluation completion date."
+        },
+        {
+          "order": 16,
+          "column": "P",
+          "sourceHeader": "Price bid opened on",
+          "internalKey": "Price_bid_opened_on",
+          "duplicateHeader": false,
+          "standardField": "priceBidDate",
+          "type": "date",
+          "description": "Date the price bid was opened."
+        },
+        {
+          "order": 17,
+          "column": "Q",
+          "sourceHeader": "TEC approval date",
+          "internalKey": "TEC_approval_date",
+          "duplicateHeader": false,
+          "standardField": "tecApprovalDate",
+          "type": "date",
+          "description": "Tender Evaluation Committee approval date."
+        },
+        {
+          "order": 18,
+          "column": "R",
+          "sourceHeader": "Technical evaluation duration in days",
+          "internalKey": "Technical_evaluation_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "techEvalDuration",
+          "type": "number",
+          "description": "Source value: technical evaluation duration in days."
+        },
+        {
+          "order": 19,
+          "column": "S",
+          "sourceHeader": "PO / OLA no",
+          "internalKey": "PO_OLA_no",
+          "duplicateHeader": false,
+          "standardField": "poNo",
+          "type": "id",
+          "description": "PO / OLA number. Kept as text."
+        },
+        {
+          "order": 20,
+          "column": "T",
+          "sourceHeader": "PO / OLA award date",
+          "internalKey": "PO_OLA_award_date",
+          "duplicateHeader": false,
+          "standardField": "awardDate",
+          "type": "date",
+          "description": "PO / OLA award date."
+        },
+        {
+          "order": 21,
+          "column": "U",
+          "sourceHeader": "PR TO PO CYCLE duration in days",
+          "internalKey": "PR_TO_PO_CYCLE_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "prToPoDuration",
+          "type": "number",
+          "description": "Source value: PR-to-PO cycle in days."
+        },
+        {
+          "order": 22,
+          "column": "V",
+          "sourceHeader": "PO / OLA validity",
+          "internalKey": "PO_OLA_validity",
+          "duplicateHeader": false,
+          "standardField": "validity",
+          "type": "date",
+          "description": "PO / OLA validity (expiry) date."
+        },
+        {
+          "order": 23,
+          "column": "W",
+          "sourceHeader": "PO / OLA cash outflow",
+          "internalKey": "PO_OLA_cash_outflow",
+          "duplicateHeader": false,
+          "standardField": "cashOutflow",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA cash outflow (default rupees)."
+        },
+        {
+          "order": 24,
+          "column": "X",
+          "sourceHeader": "Vendor",
+          "internalKey": "Vendor",
+          "duplicateHeader": false,
+          "standardField": "vendor",
+          "type": "cat",
+          "description": "Successful vendor / contractor."
+        },
+        {
+          "order": 25,
+          "column": "Y",
+          "sourceHeader": "Remarks (if any)",
+          "internalKey": "Remarks_if_any",
+          "duplicateHeader": false,
+          "standardField": "remarksAny",
+          "type": "longtext",
+          "description": "Remarks (if any)."
+        }
+      ]
+    },
+    "for PPT": {
+      "recognisedAs": "Utility / other sheet",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "Stage",
+          "internalKey": "Stage",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "No. of tenders",
+          "internalKey": "No_of_tenders",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Remarks",
+          "internalKey": "Remarks",
+          "duplicateHeader": false,
+          "standardField": "remarks",
+          "type": "longtext",
+          "description": "Remarks column (REVEX)."
+        }
+      ]
+    },
+    "Capex": {
+      "recognisedAs": "CAPEX tracker",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "SR NO",
+          "internalKey": "SR_NO",
+          "duplicateHeader": false,
+          "standardField": "srNo",
+          "type": "text",
+          "description": "Serial number of the row in the tracker."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Procurement Channel (P&CS / CPO)",
+          "internalKey": "Procurement_Channel_P_CS_CPO",
+          "duplicateHeader": false,
+          "standardField": "channel",
+          "type": "cat",
+          "description": "Procurement channel handling the tender (P&CS or CPO)."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Department",
+          "internalKey": "Department",
+          "duplicateHeader": false,
+          "standardField": "department",
+          "type": "cat",
+          "description": "Owning department (e.g. INSTR, ELECTRICAL)."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "CAPEX / REVEX",
+          "internalKey": "CAPEX_REVEX",
+          "duplicateHeader": false,
+          "standardField": "capexRevex",
+          "type": "cat",
+          "description": "Budget head: CAPEX or REVEX."
+        },
+        {
+          "order": 5,
+          "column": "E",
+          "sourceHeader": "WBS NO",
+          "internalKey": "WBS_NO",
+          "duplicateHeader": false,
+          "standardField": "wbs",
+          "type": "id",
+          "description": "SAP WBS element (CAPEX). Kept as text."
+        },
+        {
+          "order": 6,
+          "column": "F",
+          "sourceHeader": "Project Cost",
+          "internalKey": "Project_Cost",
+          "duplicateHeader": false,
+          "standardField": "projectCost",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "Sanctioned project cost (unit per header or Settings; default lakh)."
+        },
+        {
+          "order": 7,
+          "column": "G",
+          "sourceHeader": "BE 2025-26",
+          "internalKey": "BE_2025_26",
+          "duplicateHeader": false,
+          "standardField": "be",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "Budget estimate for the financial year."
+        },
+        {
+          "order": 8,
+          "column": "H",
+          "sourceHeader": "Capex Finish date",
+          "internalKey": "Capex_Finish_date",
+          "duplicateHeader": false,
+          "standardField": "capexFinish",
+          "type": "date",
+          "description": "Target date for completion of CAPEX."
+        },
+        {
+          "order": 9,
+          "column": "I",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No_1",
+          "duplicateHeader": true,
+          "standardField": "prNo",
+          "type": "id",
+          "description": "Purchase requisition number (first PR No column). Kept as text."
+        },
+        {
+          "order": 10,
+          "column": "J",
+          "sourceHeader": "PR sent date",
+          "internalKey": "PR_sent_date",
+          "duplicateHeader": false,
+          "standardField": "prSentDate",
+          "type": "date",
+          "description": "Date the PR was sent."
+        },
+        {
+          "order": 11,
+          "column": "K",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No_2",
+          "duplicateHeader": true,
+          "standardField": "prNo2",
+          "type": "id",
+          "description": "Second \"PR No\" column in the CAPEX tracker (duplicate header retained)."
+        },
+        {
+          "order": 12,
+          "column": "L",
+          "sourceHeader": "Proposal Name",
+          "internalKey": "Proposal_Name",
+          "duplicateHeader": false,
+          "standardField": "proposalName",
+          "type": "longtext",
+          "description": "Name of the CAPEX proposal."
+        },
+        {
+          "order": 13,
+          "column": "M",
+          "sourceHeader": "Job Description",
+          "internalKey": "Job_Description",
+          "duplicateHeader": false,
+          "standardField": "jobDescription",
+          "type": "longtext",
+          "description": "Description of the job / supply."
+        },
+        {
+          "order": 14,
+          "column": "N",
+          "sourceHeader": "STATUS",
+          "internalKey": "STATUS",
+          "duplicateHeader": false,
+          "standardField": "status",
+          "type": "longtext",
+          "description": "Free-text status as maintained by the user. Never overwritten."
+        },
+        {
+          "order": 15,
+          "column": "O",
+          "sourceHeader": "CRFQ / GeM ID",
+          "internalKey": "CRFQ_GeM_ID",
+          "duplicateHeader": false,
+          "standardField": "crfq",
+          "type": "id",
+          "description": "CRFQ number or GeM bid ID. Kept as text."
+        },
+        {
+          "order": 16,
+          "column": "P",
+          "sourceHeader": "Sento Concenred CPO/P&CS",
+          "internalKey": "Sento_Concenred_CPO_P_CS",
+          "duplicateHeader": false,
+          "standardField": "sentToProcurement",
+          "type": "milestone",
+          "description": "Date (or note) when sent to the concerned CPO / P&CS."
+        },
+        {
+          "order": 17,
+          "column": "Q",
+          "sourceHeader": "Tender floating date",
+          "internalKey": "Tender_floating_date",
+          "duplicateHeader": false,
+          "standardField": "floatDate",
+          "type": "date",
+          "description": "Date the tender was floated."
+        },
+        {
+          "order": 18,
+          "column": "R",
+          "sourceHeader": "Pre Bid Meeting date",
+          "internalKey": "Pre_Bid_Meeting_date",
+          "duplicateHeader": false,
+          "standardField": "prebidDate",
+          "type": "date",
+          "description": "Pre-bid meeting date."
+        },
+        {
+          "order": 19,
+          "column": "S",
+          "sourceHeader": "Tender Opening date",
+          "internalKey": "Tender_Opening_date",
+          "duplicateHeader": false,
+          "standardField": "openingDate",
+          "type": "date",
+          "description": "Scheduled tender / bid opening date."
+        },
+        {
+          "order": 20,
+          "column": "T",
+          "sourceHeader": "Actual tender opening date",
+          "internalKey": "Actual_tender_opening_date",
+          "duplicateHeader": false,
+          "standardField": "actualOpeningDate",
+          "type": "date",
+          "description": "Actual tender opening date."
+        },
+        {
+          "order": 21,
+          "column": "U",
+          "sourceHeader": "BQC & Technical evaluation date",
+          "internalKey": "BQC_Technical_evaluation_date",
+          "duplicateHeader": false,
+          "standardField": "techEvalDate",
+          "type": "date",
+          "description": "BQC & technical evaluation completion date."
+        },
+        {
+          "order": 22,
+          "column": "V",
+          "sourceHeader": "Price Bid Open On",
+          "internalKey": "Price_Bid_Open_On",
+          "duplicateHeader": false,
+          "standardField": "priceBidDate",
+          "type": "date",
+          "description": "Date the price bid was opened."
+        },
+        {
+          "order": 23,
+          "column": "W",
+          "sourceHeader": "FAT",
+          "internalKey": "FAT",
+          "duplicateHeader": false,
+          "standardField": "fat",
+          "type": "milestone",
+          "description": "Factory Acceptance Test date or status."
+        },
+        {
+          "order": 24,
+          "column": "X",
+          "sourceHeader": "SAT",
+          "internalKey": "SAT",
+          "duplicateHeader": false,
+          "standardField": "sat",
+          "type": "milestone",
+          "description": "Site Acceptance Test date or status."
+        },
+        {
+          "order": 25,
+          "column": "Y",
+          "sourceHeader": "Installation",
+          "internalKey": "Installation",
+          "duplicateHeader": false,
+          "standardField": "installation",
+          "type": "milestone",
+          "description": "Installation / commissioning date or status."
+        },
+        {
+          "order": 26,
+          "column": "Z",
+          "sourceHeader": "PO / OLA no",
+          "internalKey": "PO_OLA_no",
+          "duplicateHeader": false,
+          "standardField": "poNo",
+          "type": "id",
+          "description": "PO / OLA number. Kept as text."
+        },
+        {
+          "order": 27,
+          "column": "AA",
+          "sourceHeader": "PO / OLA award date",
+          "internalKey": "PO_OLA_award_date",
+          "duplicateHeader": false,
+          "standardField": "awardDate",
+          "type": "date",
+          "description": "PO / OLA award date."
+        },
+        {
+          "order": 28,
+          "column": "AB",
+          "sourceHeader": "SLA",
+          "internalKey": "SLA",
+          "duplicateHeader": false,
+          "standardField": "sla",
+          "type": "text",
+          "description": "Service level / delivery terms."
+        },
+        {
+          "order": 29,
+          "column": "AC",
+          "sourceHeader": "PO / OLA validity",
+          "internalKey": "PO_OLA_validity",
+          "duplicateHeader": false,
+          "standardField": "validity",
+          "type": "date",
+          "description": "PO / OLA validity (expiry) date."
+        },
+        {
+          "order": 30,
+          "column": "AD",
+          "sourceHeader": "PO / OLA cash outflow (including tax)",
+          "internalKey": "PO_OLA_cash_outflow_including_tax",
+          "duplicateHeader": false,
+          "standardField": "cashOutflowIncl",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA value including tax (default rupees)."
+        },
+        {
+          "order": 31,
+          "column": "AE",
+          "sourceHeader": "PO / OLA cash outflow (Excluding tax)",
+          "internalKey": "PO_OLA_cash_outflow_Excluding_tax",
+          "duplicateHeader": false,
+          "standardField": "cashOutflowExcl",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA value excluding tax (default rupees)."
+        },
+        {
+          "order": 32,
+          "column": "AF",
+          "sourceHeader": "Vendor",
+          "internalKey": "Vendor",
+          "duplicateHeader": false,
+          "standardField": "vendor",
+          "type": "cat",
+          "description": "Successful vendor / contractor."
+        },
+        {
+          "order": 33,
+          "column": "AG",
+          "sourceHeader": "Remarks (if any)",
+          "internalKey": "Remarks_if_any",
+          "duplicateHeader": false,
+          "standardField": "remarksAny",
+          "type": "longtext",
+          "description": "Remarks (if any)."
+        },
+        {
+          "order": 34,
+          "column": "AH",
+          "sourceHeader": "Project Handing over",
+          "internalKey": "Project_Handing_over",
+          "duplicateHeader": false,
+          "standardField": "handover",
+          "type": "milestone",
+          "description": "Project handing-over date or status."
+        }
+      ]
+    },
+    "REVEX 2026": {
+      "recognisedAs": "REVEX tracker",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "SR. NO.",
+          "internalKey": "SR_NO",
+          "duplicateHeader": false,
+          "standardField": "srNo",
+          "type": "text",
+          "description": "Serial number of the row in the tracker."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Procurement Channel (P&CS / CPO)",
+          "internalKey": "Procurement_Channel_P_CS_CPO",
+          "duplicateHeader": false,
+          "standardField": "channel",
+          "type": "cat",
+          "description": "Procurement channel handling the tender (P&CS or CPO)."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Department",
+          "internalKey": "Department",
+          "duplicateHeader": false,
+          "standardField": "department",
+          "type": "cat",
+          "description": "Owning department (e.g. INSTR, ELECTRICAL)."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "Tender Initiator",
+          "internalKey": "Tender_Initiator",
+          "duplicateHeader": false,
+          "standardField": "initiator",
+          "type": "cat",
+          "description": "Person who initiated the tender."
+        },
+        {
+          "order": 5,
+          "column": "E",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No",
+          "duplicateHeader": false,
+          "standardField": "prNo",
+          "type": "id",
+          "description": "Purchase requisition number (first PR No column). Kept as text."
+        },
+        {
+          "order": 6,
+          "column": "F",
+          "sourceHeader": "PR sent date",
+          "internalKey": "PR_sent_date",
+          "duplicateHeader": false,
+          "standardField": "prSentDate",
+          "type": "date",
+          "description": "Date the PR was sent."
+        },
+        {
+          "order": 7,
+          "column": "G",
+          "sourceHeader": "Job Description",
+          "internalKey": "Job_Description",
+          "duplicateHeader": false,
+          "standardField": "jobDescription",
+          "type": "longtext",
+          "description": "Description of the job / supply."
+        },
+        {
+          "order": 8,
+          "column": "H",
+          "sourceHeader": "Remarks",
+          "internalKey": "Remarks",
+          "duplicateHeader": false,
+          "standardField": "remarks",
+          "type": "longtext",
+          "description": "Remarks column (REVEX)."
+        },
+        {
+          "order": 9,
+          "column": "I",
+          "sourceHeader": "Nature",
+          "internalKey": "Nature",
+          "duplicateHeader": false,
+          "standardField": "nature",
+          "type": "cat",
+          "description": "Nature of work (Supply / Service / Works / Rate contract)."
+        },
+        {
+          "order": 10,
+          "column": "J",
+          "sourceHeader": "Estimated Cost (In Lacs)",
+          "internalKey": "Estimated_Cost_In_Lacs",
+          "duplicateHeader": false,
+          "standardField": "estCost",
+          "type": "amount",
+          "unit": "lakh",
+          "description": "Estimated cost (header states unit, e.g. In Lacs)."
+        },
+        {
+          "order": 11,
+          "column": "K",
+          "sourceHeader": "CRFQ / GeM ID",
+          "internalKey": "CRFQ_GeM_ID",
+          "duplicateHeader": false,
+          "standardField": "crfq",
+          "type": "id",
+          "description": "CRFQ number or GeM bid ID. Kept as text."
+        },
+        {
+          "order": 12,
+          "column": "L",
+          "sourceHeader": "Tender floating date",
+          "internalKey": "Tender_floating_date",
+          "duplicateHeader": false,
+          "standardField": "floatDate",
+          "type": "date",
+          "description": "Date the tender was floated."
+        },
+        {
+          "order": 13,
+          "column": "M",
+          "sourceHeader": "Tender Floating duration in days",
+          "internalKey": "Tender_Floating_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "floatDuration",
+          "type": "number",
+          "description": "Source value: tender floating duration in days."
+        },
+        {
+          "order": 14,
+          "column": "N",
+          "sourceHeader": "Bid opening date",
+          "internalKey": "Bid_opening_date",
+          "duplicateHeader": false,
+          "standardField": "openingDate",
+          "type": "date",
+          "description": "Scheduled tender / bid opening date."
+        },
+        {
+          "order": 15,
+          "column": "O",
+          "sourceHeader": "BQC & Technical evaluation date",
+          "internalKey": "BQC_Technical_evaluation_date",
+          "duplicateHeader": false,
+          "standardField": "techEvalDate",
+          "type": "date",
+          "description": "BQC & technical evaluation completion date."
+        },
+        {
+          "order": 16,
+          "column": "P",
+          "sourceHeader": "Price bid opened on",
+          "internalKey": "Price_bid_opened_on",
+          "duplicateHeader": false,
+          "standardField": "priceBidDate",
+          "type": "date",
+          "description": "Date the price bid was opened."
+        },
+        {
+          "order": 17,
+          "column": "Q",
+          "sourceHeader": "TEC approval date",
+          "internalKey": "TEC_approval_date",
+          "duplicateHeader": false,
+          "standardField": "tecApprovalDate",
+          "type": "date",
+          "description": "Tender Evaluation Committee approval date."
+        },
+        {
+          "order": 18,
+          "column": "R",
+          "sourceHeader": "Technical evaluation duration in days",
+          "internalKey": "Technical_evaluation_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "techEvalDuration",
+          "type": "number",
+          "description": "Source value: technical evaluation duration in days."
+        },
+        {
+          "order": 19,
+          "column": "S",
+          "sourceHeader": "PO / OLA no",
+          "internalKey": "PO_OLA_no",
+          "duplicateHeader": false,
+          "standardField": "poNo",
+          "type": "id",
+          "description": "PO / OLA number. Kept as text."
+        },
+        {
+          "order": 20,
+          "column": "T",
+          "sourceHeader": "PO / OLA award date",
+          "internalKey": "PO_OLA_award_date",
+          "duplicateHeader": false,
+          "standardField": "awardDate",
+          "type": "date",
+          "description": "PO / OLA award date."
+        },
+        {
+          "order": 21,
+          "column": "U",
+          "sourceHeader": "PR TO PO CYCLE duration in days",
+          "internalKey": "PR_TO_PO_CYCLE_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "prToPoDuration",
+          "type": "number",
+          "description": "Source value: PR-to-PO cycle in days."
+        },
+        {
+          "order": 22,
+          "column": "V",
+          "sourceHeader": "PO / OLA validity",
+          "internalKey": "PO_OLA_validity",
+          "duplicateHeader": false,
+          "standardField": "validity",
+          "type": "date",
+          "description": "PO / OLA validity (expiry) date."
+        },
+        {
+          "order": 23,
+          "column": "W",
+          "sourceHeader": "PO / OLA cash outflow",
+          "internalKey": "PO_OLA_cash_outflow",
+          "duplicateHeader": false,
+          "standardField": "cashOutflow",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA cash outflow (default rupees)."
+        },
+        {
+          "order": 24,
+          "column": "X",
+          "sourceHeader": "Vendor",
+          "internalKey": "Vendor",
+          "duplicateHeader": false,
+          "standardField": "vendor",
+          "type": "cat",
+          "description": "Successful vendor / contractor."
+        },
+        {
+          "order": 25,
+          "column": "Y",
+          "sourceHeader": "Remarks (if any)",
+          "internalKey": "Remarks_if_any",
+          "duplicateHeader": false,
+          "standardField": "remarksAny",
+          "type": "longtext",
+          "description": "Remarks (if any)."
+        }
+      ]
+    },
+    "P&CS discussion": {
+      "recognisedAs": "Utility / other sheet",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "Date",
+          "internalKey": "Date",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Point",
+          "internalKey": "Point",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Action by",
+          "internalKey": "Action_by",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "Remarks",
+          "internalKey": "Remarks",
+          "duplicateHeader": false,
+          "standardField": "remarks",
+          "type": "longtext",
+          "description": "Remarks column (REVEX)."
+        }
+      ]
+    },
+    "WF&P": {
+      "recognisedAs": "Utility / other sheet",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "SR NO",
+          "internalKey": "SR_NO",
+          "duplicateHeader": false,
+          "standardField": "srNo",
+          "type": "text",
+          "description": "Serial number of the row in the tracker."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Item",
+          "internalKey": "Item",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Qty",
+          "internalKey": "Qty",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "Remarks",
+          "internalKey": "Remarks",
+          "duplicateHeader": false,
+          "standardField": "remarks",
+          "type": "longtext",
+          "description": "Remarks column (REVEX)."
+        }
+      ]
+    },
+    "Capex Modified": {
+      "recognisedAs": "CAPEX tracker (modified)",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "SR NO",
+          "internalKey": "SR_NO",
+          "duplicateHeader": false,
+          "standardField": "srNo",
+          "type": "text",
+          "description": "Serial number of the row in the tracker."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Procurement Channel (P&CS / CPO)",
+          "internalKey": "Procurement_Channel_P_CS_CPO",
+          "duplicateHeader": false,
+          "standardField": "channel",
+          "type": "cat",
+          "description": "Procurement channel handling the tender (P&CS or CPO)."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Department",
+          "internalKey": "Department",
+          "duplicateHeader": false,
+          "standardField": "department",
+          "type": "cat",
+          "description": "Owning department (e.g. INSTR, ELECTRICAL)."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "CAPEX / REVEX",
+          "internalKey": "CAPEX_REVEX",
+          "duplicateHeader": false,
+          "standardField": "capexRevex",
+          "type": "cat",
+          "description": "Budget head: CAPEX or REVEX."
+        },
+        {
+          "order": 5,
+          "column": "E",
+          "sourceHeader": "WBS NO",
+          "internalKey": "WBS_NO",
+          "duplicateHeader": false,
+          "standardField": "wbs",
+          "type": "id",
+          "description": "SAP WBS element (CAPEX). Kept as text."
+        },
+        {
+          "order": 6,
+          "column": "F",
+          "sourceHeader": "Project Cost",
+          "internalKey": "Project_Cost",
+          "duplicateHeader": false,
+          "standardField": "projectCost",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "Sanctioned project cost (unit per header or Settings; default lakh)."
+        },
+        {
+          "order": 7,
+          "column": "G",
+          "sourceHeader": "BE 2025-26",
+          "internalKey": "BE_2025_26",
+          "duplicateHeader": false,
+          "standardField": "be",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "Budget estimate for the financial year."
+        },
+        {
+          "order": 8,
+          "column": "H",
+          "sourceHeader": "Capex Finish date",
+          "internalKey": "Capex_Finish_date",
+          "duplicateHeader": false,
+          "standardField": "capexFinish",
+          "type": "date",
+          "description": "Target date for completion of CAPEX."
+        },
+        {
+          "order": 9,
+          "column": "I",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No_1",
+          "duplicateHeader": true,
+          "standardField": "prNo",
+          "type": "id",
+          "description": "Purchase requisition number (first PR No column). Kept as text."
+        },
+        {
+          "order": 10,
+          "column": "J",
+          "sourceHeader": "PR sent date",
+          "internalKey": "PR_sent_date",
+          "duplicateHeader": false,
+          "standardField": "prSentDate",
+          "type": "date",
+          "description": "Date the PR was sent."
+        },
+        {
+          "order": 11,
+          "column": "K",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No_2",
+          "duplicateHeader": true,
+          "standardField": "prNo2",
+          "type": "id",
+          "description": "Second \"PR No\" column in the CAPEX tracker (duplicate header retained)."
+        },
+        {
+          "order": 12,
+          "column": "L",
+          "sourceHeader": "Proposal Name",
+          "internalKey": "Proposal_Name",
+          "duplicateHeader": false,
+          "standardField": "proposalName",
+          "type": "longtext",
+          "description": "Name of the CAPEX proposal."
+        },
+        {
+          "order": 13,
+          "column": "M",
+          "sourceHeader": "Job Description",
+          "internalKey": "Job_Description",
+          "duplicateHeader": false,
+          "standardField": "jobDescription",
+          "type": "longtext",
+          "description": "Description of the job / supply."
+        },
+        {
+          "order": 14,
+          "column": "N",
+          "sourceHeader": "STATUS",
+          "internalKey": "STATUS",
+          "duplicateHeader": false,
+          "standardField": "status",
+          "type": "longtext",
+          "description": "Free-text status as maintained by the user. Never overwritten."
+        },
+        {
+          "order": 15,
+          "column": "O",
+          "sourceHeader": "CRFQ / GeM ID",
+          "internalKey": "CRFQ_GeM_ID",
+          "duplicateHeader": false,
+          "standardField": "crfq",
+          "type": "id",
+          "description": "CRFQ number or GeM bid ID. Kept as text."
+        },
+        {
+          "order": 16,
+          "column": "P",
+          "sourceHeader": "Sento Concenred CPO/P&CS",
+          "internalKey": "Sento_Concenred_CPO_P_CS",
+          "duplicateHeader": false,
+          "standardField": "sentToProcurement",
+          "type": "milestone",
+          "description": "Date (or note) when sent to the concerned CPO / P&CS."
+        },
+        {
+          "order": 17,
+          "column": "Q",
+          "sourceHeader": "Tender floating date",
+          "internalKey": "Tender_floating_date",
+          "duplicateHeader": false,
+          "standardField": "floatDate",
+          "type": "date",
+          "description": "Date the tender was floated."
+        },
+        {
+          "order": 18,
+          "column": "R",
+          "sourceHeader": "Pre Bid Meeting date",
+          "internalKey": "Pre_Bid_Meeting_date",
+          "duplicateHeader": false,
+          "standardField": "prebidDate",
+          "type": "date",
+          "description": "Pre-bid meeting date."
+        },
+        {
+          "order": 19,
+          "column": "S",
+          "sourceHeader": "Tender Opening date",
+          "internalKey": "Tender_Opening_date",
+          "duplicateHeader": false,
+          "standardField": "openingDate",
+          "type": "date",
+          "description": "Scheduled tender / bid opening date."
+        },
+        {
+          "order": 20,
+          "column": "T",
+          "sourceHeader": "Actual tender opening date",
+          "internalKey": "Actual_tender_opening_date",
+          "duplicateHeader": false,
+          "standardField": "actualOpeningDate",
+          "type": "date",
+          "description": "Actual tender opening date."
+        },
+        {
+          "order": 21,
+          "column": "U",
+          "sourceHeader": "BQC & Technical evaluation date",
+          "internalKey": "BQC_Technical_evaluation_date",
+          "duplicateHeader": false,
+          "standardField": "techEvalDate",
+          "type": "date",
+          "description": "BQC & technical evaluation completion date."
+        },
+        {
+          "order": 22,
+          "column": "V",
+          "sourceHeader": "Price Bid Open On",
+          "internalKey": "Price_Bid_Open_On",
+          "duplicateHeader": false,
+          "standardField": "priceBidDate",
+          "type": "date",
+          "description": "Date the price bid was opened."
+        },
+        {
+          "order": 23,
+          "column": "W",
+          "sourceHeader": "FAT",
+          "internalKey": "FAT",
+          "duplicateHeader": false,
+          "standardField": "fat",
+          "type": "milestone",
+          "description": "Factory Acceptance Test date or status."
+        },
+        {
+          "order": 24,
+          "column": "X",
+          "sourceHeader": "SAT",
+          "internalKey": "SAT",
+          "duplicateHeader": false,
+          "standardField": "sat",
+          "type": "milestone",
+          "description": "Site Acceptance Test date or status."
+        },
+        {
+          "order": 25,
+          "column": "Y",
+          "sourceHeader": "Installation",
+          "internalKey": "Installation",
+          "duplicateHeader": false,
+          "standardField": "installation",
+          "type": "milestone",
+          "description": "Installation / commissioning date or status."
+        },
+        {
+          "order": 26,
+          "column": "Z",
+          "sourceHeader": "PO / OLA no",
+          "internalKey": "PO_OLA_no",
+          "duplicateHeader": false,
+          "standardField": "poNo",
+          "type": "id",
+          "description": "PO / OLA number. Kept as text."
+        },
+        {
+          "order": 27,
+          "column": "AA",
+          "sourceHeader": "PO / OLA award date",
+          "internalKey": "PO_OLA_award_date",
+          "duplicateHeader": false,
+          "standardField": "awardDate",
+          "type": "date",
+          "description": "PO / OLA award date."
+        },
+        {
+          "order": 28,
+          "column": "AB",
+          "sourceHeader": "SLA",
+          "internalKey": "SLA",
+          "duplicateHeader": false,
+          "standardField": "sla",
+          "type": "text",
+          "description": "Service level / delivery terms."
+        },
+        {
+          "order": 29,
+          "column": "AC",
+          "sourceHeader": "PO / OLA validity",
+          "internalKey": "PO_OLA_validity",
+          "duplicateHeader": false,
+          "standardField": "validity",
+          "type": "date",
+          "description": "PO / OLA validity (expiry) date."
+        },
+        {
+          "order": 30,
+          "column": "AD",
+          "sourceHeader": "PO / OLA cash outflow (including tax)",
+          "internalKey": "PO_OLA_cash_outflow_including_tax",
+          "duplicateHeader": false,
+          "standardField": "cashOutflowIncl",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA value including tax (default rupees)."
+        },
+        {
+          "order": 31,
+          "column": "AE",
+          "sourceHeader": "PO / OLA cash outflow (Excluding tax)",
+          "internalKey": "PO_OLA_cash_outflow_Excluding_tax",
+          "duplicateHeader": false,
+          "standardField": "cashOutflowExcl",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA value excluding tax (default rupees)."
+        },
+        {
+          "order": 32,
+          "column": "AF",
+          "sourceHeader": "Vendor",
+          "internalKey": "Vendor",
+          "duplicateHeader": false,
+          "standardField": "vendor",
+          "type": "cat",
+          "description": "Successful vendor / contractor."
+        },
+        {
+          "order": 33,
+          "column": "AG",
+          "sourceHeader": "Remarks (if any)",
+          "internalKey": "Remarks_if_any",
+          "duplicateHeader": false,
+          "standardField": "remarksAny",
+          "type": "longtext",
+          "description": "Remarks (if any)."
+        },
+        {
+          "order": 34,
+          "column": "AH",
+          "sourceHeader": "Project Handing over",
+          "internalKey": "Project_Handing_over",
+          "duplicateHeader": false,
+          "standardField": "handover",
+          "type": "milestone",
+          "description": "Project handing-over date or status."
+        },
+        {
+          "order": 35,
+          "column": "AI",
+          "sourceHeader": "Days Since Float",
+          "internalKey": "Days_Since_Float",
+          "duplicateHeader": false,
+          "standardField": "daysSinceFloat",
+          "type": "number",
+          "description": "Source snapshot: days since float (Capex Modified)."
+        },
+        {
+          "order": 36,
+          "column": "AJ",
+          "sourceHeader": "Days to Opening",
+          "internalKey": "Days_to_Opening",
+          "duplicateHeader": false,
+          "standardField": "daysToOpening",
+          "type": "number",
+          "description": "Source snapshot: days to opening (Capex Modified)."
+        },
+        {
+          "order": 37,
+          "column": "AK",
+          "sourceHeader": "Status Flag",
+          "internalKey": "Status_Flag",
+          "duplicateHeader": false,
+          "standardField": "statusFlag",
+          "type": "cat",
+          "description": "Source status flag (Capex Modified)."
+        },
+        {
+          "order": 38,
+          "column": "AL",
+          "sourceHeader": "Quick Status",
+          "internalKey": "Quick_Status",
+          "duplicateHeader": false,
+          "standardField": "quickStatus",
+          "type": "cat",
+          "description": "Source quick status (Capex Modified)."
+        }
+      ]
+    },
+    "spare revex": {
+      "recognisedAs": "REVEX tracker",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "SR. NO.",
+          "internalKey": "SR_NO",
+          "duplicateHeader": false,
+          "standardField": "srNo",
+          "type": "text",
+          "description": "Serial number of the row in the tracker."
+        },
+        {
+          "order": 2,
+          "column": "B",
+          "sourceHeader": "Procurement Channel (P&CS / CPO)",
+          "internalKey": "Procurement_Channel_P_CS_CPO",
+          "duplicateHeader": false,
+          "standardField": "channel",
+          "type": "cat",
+          "description": "Procurement channel handling the tender (P&CS or CPO)."
+        },
+        {
+          "order": 3,
+          "column": "C",
+          "sourceHeader": "Department",
+          "internalKey": "Department",
+          "duplicateHeader": false,
+          "standardField": "department",
+          "type": "cat",
+          "description": "Owning department (e.g. INSTR, ELECTRICAL)."
+        },
+        {
+          "order": 4,
+          "column": "D",
+          "sourceHeader": "Tender Initiator",
+          "internalKey": "Tender_Initiator",
+          "duplicateHeader": false,
+          "standardField": "initiator",
+          "type": "cat",
+          "description": "Person who initiated the tender."
+        },
+        {
+          "order": 5,
+          "column": "E",
+          "sourceHeader": "PR No",
+          "internalKey": "PR_No",
+          "duplicateHeader": false,
+          "standardField": "prNo",
+          "type": "id",
+          "description": "Purchase requisition number (first PR No column). Kept as text."
+        },
+        {
+          "order": 6,
+          "column": "F",
+          "sourceHeader": "PR sent date",
+          "internalKey": "PR_sent_date",
+          "duplicateHeader": false,
+          "standardField": "prSentDate",
+          "type": "date",
+          "description": "Date the PR was sent."
+        },
+        {
+          "order": 7,
+          "column": "G",
+          "sourceHeader": "Job Description",
+          "internalKey": "Job_Description",
+          "duplicateHeader": false,
+          "standardField": "jobDescription",
+          "type": "longtext",
+          "description": "Description of the job / supply."
+        },
+        {
+          "order": 8,
+          "column": "H",
+          "sourceHeader": "Remarks",
+          "internalKey": "Remarks",
+          "duplicateHeader": false,
+          "standardField": "remarks",
+          "type": "longtext",
+          "description": "Remarks column (REVEX)."
+        },
+        {
+          "order": 9,
+          "column": "I",
+          "sourceHeader": "Nature",
+          "internalKey": "Nature",
+          "duplicateHeader": false,
+          "standardField": "nature",
+          "type": "cat",
+          "description": "Nature of work (Supply / Service / Works / Rate contract)."
+        },
+        {
+          "order": 10,
+          "column": "J",
+          "sourceHeader": "Estimated Cost (In Lacs)",
+          "internalKey": "Estimated_Cost_In_Lacs",
+          "duplicateHeader": false,
+          "standardField": "estCost",
+          "type": "amount",
+          "unit": "lakh",
+          "description": "Estimated cost (header states unit, e.g. In Lacs)."
+        },
+        {
+          "order": 11,
+          "column": "K",
+          "sourceHeader": "CRFQ / GeM ID",
+          "internalKey": "CRFQ_GeM_ID",
+          "duplicateHeader": false,
+          "standardField": "crfq",
+          "type": "id",
+          "description": "CRFQ number or GeM bid ID. Kept as text."
+        },
+        {
+          "order": 12,
+          "column": "L",
+          "sourceHeader": "Tender floating date",
+          "internalKey": "Tender_floating_date",
+          "duplicateHeader": false,
+          "standardField": "floatDate",
+          "type": "date",
+          "description": "Date the tender was floated."
+        },
+        {
+          "order": 13,
+          "column": "M",
+          "sourceHeader": "Tender Floating duration in days",
+          "internalKey": "Tender_Floating_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "floatDuration",
+          "type": "number",
+          "description": "Source value: tender floating duration in days."
+        },
+        {
+          "order": 14,
+          "column": "N",
+          "sourceHeader": "Bid opening date",
+          "internalKey": "Bid_opening_date",
+          "duplicateHeader": false,
+          "standardField": "openingDate",
+          "type": "date",
+          "description": "Scheduled tender / bid opening date."
+        },
+        {
+          "order": 15,
+          "column": "O",
+          "sourceHeader": "BQC & Technical evaluation date",
+          "internalKey": "BQC_Technical_evaluation_date",
+          "duplicateHeader": false,
+          "standardField": "techEvalDate",
+          "type": "date",
+          "description": "BQC & technical evaluation completion date."
+        },
+        {
+          "order": 16,
+          "column": "P",
+          "sourceHeader": "Price bid opened on",
+          "internalKey": "Price_bid_opened_on",
+          "duplicateHeader": false,
+          "standardField": "priceBidDate",
+          "type": "date",
+          "description": "Date the price bid was opened."
+        },
+        {
+          "order": 17,
+          "column": "Q",
+          "sourceHeader": "TEC approval date",
+          "internalKey": "TEC_approval_date",
+          "duplicateHeader": false,
+          "standardField": "tecApprovalDate",
+          "type": "date",
+          "description": "Tender Evaluation Committee approval date."
+        },
+        {
+          "order": 18,
+          "column": "R",
+          "sourceHeader": "Technical evaluation duration in days",
+          "internalKey": "Technical_evaluation_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "techEvalDuration",
+          "type": "number",
+          "description": "Source value: technical evaluation duration in days."
+        },
+        {
+          "order": 19,
+          "column": "S",
+          "sourceHeader": "PO / OLA no",
+          "internalKey": "PO_OLA_no",
+          "duplicateHeader": false,
+          "standardField": "poNo",
+          "type": "id",
+          "description": "PO / OLA number. Kept as text."
+        },
+        {
+          "order": 20,
+          "column": "T",
+          "sourceHeader": "PO / OLA award date",
+          "internalKey": "PO_OLA_award_date",
+          "duplicateHeader": false,
+          "standardField": "awardDate",
+          "type": "date",
+          "description": "PO / OLA award date."
+        },
+        {
+          "order": 21,
+          "column": "U",
+          "sourceHeader": "PR TO PO CYCLE duration in days",
+          "internalKey": "PR_TO_PO_CYCLE_duration_in_days",
+          "duplicateHeader": false,
+          "standardField": "prToPoDuration",
+          "type": "number",
+          "description": "Source value: PR-to-PO cycle in days."
+        },
+        {
+          "order": 22,
+          "column": "V",
+          "sourceHeader": "PO / OLA validity",
+          "internalKey": "PO_OLA_validity",
+          "duplicateHeader": false,
+          "standardField": "validity",
+          "type": "date",
+          "description": "PO / OLA validity (expiry) date."
+        },
+        {
+          "order": 23,
+          "column": "W",
+          "sourceHeader": "PO / OLA cash outflow",
+          "internalKey": "PO_OLA_cash_outflow",
+          "duplicateHeader": false,
+          "standardField": "cashOutflow",
+          "type": "amount",
+          "unit": "from Settings",
+          "description": "PO / OLA cash outflow (default rupees)."
+        },
+        {
+          "order": 24,
+          "column": "X",
+          "sourceHeader": "Vendor",
+          "internalKey": "Vendor",
+          "duplicateHeader": false,
+          "standardField": "vendor",
+          "type": "cat",
+          "description": "Successful vendor / contractor."
+        },
+        {
+          "order": 25,
+          "column": "Y",
+          "sourceHeader": "Remarks (if any)",
+          "internalKey": "Remarks_if_any",
+          "duplicateHeader": false,
+          "standardField": "remarksAny",
+          "type": "longtext",
+          "description": "Remarks (if any)."
+        }
+      ]
+    },
+    "Sheet1": {
+      "recognisedAs": "Utility / other sheet",
+      "columns": [
+        {
+          "order": 1,
+          "column": "A",
+          "sourceHeader": "Note",
+          "internalKey": "Note",
+          "duplicateHeader": false,
+          "standardField": null,
+          "type": "text",
+          "description": "Unmapped source column — retained and shown as-is."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; connect-src 'none'; object-src 'none'">
+  <title>Tender Monitoring Dashboard — Self-test</title>
+  <style>
+    body { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif; margin: 24px; color: #18202b; }
+    h1 { font-size: 20px; color: #0f4c9c; }
+    .sum { font-size: 15px; margin: 10px 0 16px; font-weight: 600; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    td, th { border: 1px solid #dde2e8; padding: 4px 8px; text-align: left; vertical-align: top; }
+    .pass { color: #11703a; font-weight: 700; } .fail { color: #b0261b; font-weight: 700; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Self-test — parsing, status engine and calculations</h1>
+  <p>Runs entirely offline in this browser. Open this file directly (double-click) or via the local server.</p>
+  <div class="sum" id="sum">Running…</div>
+  <table><thead><tr><th>Result</th><th>Test</th><th>Expected</th><th>Actual</th></tr></thead><tbody id="out"></tbody></table>
+  <script src="../lib/xlsx.full.min.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/icons.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/data-normaliser.js"></script>
+  <script src="../js/calculations.js"></script>
+  <script src="../js/sample-data.js"></script>
+  <script src="../js/audit-log.js"></script>
+  <script src="../js/data-loader.js"></script>
+  <script src="self-test.js"></script>
+</body>
+</html>
