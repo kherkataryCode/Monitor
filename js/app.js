@@ -43,7 +43,18 @@
     TMD.$('#navToggle').setAttribute('aria-expanded', String(open));
     TMD.$('#navScrim').hidden = !(open && narrow());
     if (persist && !narrow()) TMD.settings.set('navExpanded', open);
-    setTimeout(() => { const m = TMD.activeModule(); if (m.grid && m.grid.resize) m.grid.resize(); TMD.charts.refresh(); }, 240);
+    setTimeout(() => { const m = TMD.activeModule(); if (m.grid && m.grid.resize) m.grid.resize(); TMD.charts.refresh(); }, 220);
+  }
+
+  function bindSidebarHover() {
+    const sideNav = TMD.$('#sideNav');
+    if (!sideNav) return;
+    sideNav.addEventListener('mouseenter', () => {
+      if (!narrow()) setNav(true, false);
+    });
+    sideNav.addEventListener('mouseleave', () => {
+      if (!narrow()) setNav(false, false);
+    });
   }
 
   /* ---------------- Header ---------------- */
@@ -65,12 +76,11 @@
     if (!pm) meta.innerHTML = page === 'home' ? '<span class="meta-item">Overview</span>' : `<span class="meta-item">${esc(TMD.$('#page-' + page).dataset.title || '')}</span>`;
     else if (!wb) meta.innerHTML = '<span class="meta-item">No data loaded</span>';
     else {
-      meta.innerHTML = `<button class="meta-item linklike" id="hdrSheets" title="File: ${esc(wb.fileName)} · worksheet(s): ${esc(st.activeSheets.join(' + '))} · imported ${esc(TMD.fmtDateTime(wb.importedAt))} — click to change worksheets">${TMD.icon('file')}<span class="mi-file">${esc(wb.fileName)}</span><span class="mi-sep">·</span>${esc(st.activeSheets.join(' + '))}</button>
-${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
+      meta.innerHTML = `<button class="meta-item linklike" id="hdrSheets" title="File: ${esc(wb.fileName)} · worksheet(s): ${esc(st.activeSheets.join(' + '))} · imported ${esc(TMD.fmtDateTime(wb.importedAt || new Date()))}">${TMD.icon('database')}<span class="mi-file">${esc(wb.fileName)}</span></button>${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
     }
     const banner = TMD.$('#demoBanner');
     banner.hidden = !(pm && wb && wb.isDemo);
-    if (!banner.hidden) banner.innerHTML = `<span><strong>Demonstration data</strong> — ${pm === 'cyber' ? 'no Cyber Security Audit file has been loaded yet.' : 'the original tender workbook has not been loaded.'}</span> <button class="btn tiny" id="bannerImport">${TMD.icon('upload')}<span>Import ${pm === 'cyber' ? 'audit' : 'tender'} data</span></button>`;
+    if (!banner.hidden) banner.innerHTML = `<span><strong>Demonstration data</strong> — ${pm === 'cyber' ? 'no Cyber Security Audit file has been loaded yet.' : 'the original tender workbook has not been imported yet.'}</span><button class="btn subtle tiny" id="bannerImport">Import data</button>`;
 
     const setCount = (id, n) => { const e = TMD.$(id); if (e) e.textContent = n ? String(n) : ''; };
     setCount('#navAlertCount', TMD.alertCount());
@@ -157,7 +167,7 @@ ${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
     const M = TMD.modules[pm];
     TMD.$('#page-' + page).innerHTML = `<div class="empty-state big">${TMD.icon(pm === 'cyber' ? 'shield' : 'file')}<h2>No ${esc(M.label)} data loaded</h2>
       <p class="muted">Import an Excel (.xlsx / .xls) or CSV file. It is read locally and never uploaded.</p>
-      <div class="row-btns"><button class="btn primary" data-empty-imp="${pm}">${TMD.icon('upload')}<span>Import data</span></button><button class="btn subtle" data-empty-demo="${pm}">${TMD.icon('database')}<span>Load demonstration data</span></button></div></div>`;
+      <div class="row-btns"><button class="btn primary" data-empty-imp="${pm}">${TMD.icon('upload')}<span>Import data</span></button><button class="btn subtle" data-empty-demo="${pm}">${TMD.icon('database')}<span>Load demo</span></button></div></div>`;
   }
   const pendingPages = new Set();
   let pending = 0;
@@ -172,7 +182,7 @@ ${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
       const main = TMD.$('#main');
       const y = main.scrollTop;
       if (page === 'home' || (pm && (mods.has('*') || mods.has(pm)))) renderPage(page, false);
-      main.scrollTop = y; // no page jumping when filters change
+      main.scrollTop = y;
       updateHeader();
     });
   }
@@ -219,7 +229,7 @@ ${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
         dz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
         dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('over'); });
         dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-        dz.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.remove('over'); TMD.$('#dropOverlay').hidden = true; const f = e.dataTransfer.files[0]; close(null); if (f) TMD.importFile(f, M); });
+        dz.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.remove('over'); TMD.$('#dropOverlay').hidden = true; const f = e.dataTransfer.files[0]; close(null); if (f) TMD.importFile(f, TMD.modules[mid]); });
         dlg.querySelector('#dzDemo').addEventListener('click', () => { close(null); loadDemoFor(mid); });
         dlg.querySelector('#dzReport').addEventListener('click', () => { close(null); TMD.showImportReport(M.state.workbook); });
         TMD._closeImport = close;
@@ -254,7 +264,7 @@ ${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
       if (rec && rec.workbook) {
         const ok = await TMD.modal({
           title: `Recover unsaved ${M.label} changes?`,
-          body: `<p>An Edit Mode session with unsaved changes was found (last autosave ${esc(TMD.fmtDateTime(meta.at))}, file <strong>${esc(rec.workbook.fileName)}</strong>).</p><p>Recover these changes? They will become the local working copy. Choose “Discard” to open the last saved working copy instead.</p>`,
+          body: `<p>An Edit Mode session with unsaved changes was found (last autosave ${esc(TMD.fmtDateTime(meta.at))}, file <strong>${esc(rec.workbook.fileName)}</strong>).</p><p>Recover these changes or discard them and keep the last saved copy.</p>`,
           buttons: [{ label: 'Discard recovery data', value: false, kind: 'danger' }, { label: 'Recover changes', value: true, kind: 'primary' }], dismissValue: false,
         });
         await TMD.idb.del(M.slots.recovery); await TMD.idb.del(M.slots.meta);
@@ -309,6 +319,7 @@ ${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
     TMD.$('#btnTheme').addEventListener('click', () => { TMD.settings.set('theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
     TMD.$('#navToggle').innerHTML = TMD.icon('sidebar');
     TMD.$('#navToggle').addEventListener('click', () => setNav(!document.body.classList.contains('nav-expanded'), true));
+    bindSidebarHover();
     TMD.$('#navScrim').addEventListener('click', () => setNav(false));
     if (TMD.settings.get('navExpanded') && !narrow()) setNav(true);
     TMD.$('#hdrMeta').addEventListener('click', (e) => { if (e.target.closest('#hdrSheets')) TMD.manageSheets(TMD.activeModule()); });
@@ -389,7 +400,7 @@ ${wb.isDemo ? '<span class="tag tag-amber">Demo data</span>' : ''}`;
       if (keys.some((k) => /density|frozenCols/i.test(k))) { if (TMD.state.page === 'register') TMD.table.refresh(true); if (TMD.state.page === 'cyber-register') TMD.cyber.grid.refresh(true); }
       if (keys.some((k) => k === 'amountUnit' || k === 'currency')) { TMD.charts.restyle(); scheduleRender(); }
     });
-    if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (TMD.settings.get('theme') === 'system') { applyTheme(); TMD.charts.restyle(); } });
+    if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (TMD.settings.get('theme') === 'system') { applyTheme(); TMD.charts.restyle(); }});
     window.addEventListener('hashchange', route);
     window.addEventListener('resize', TMD.debounce ? TMD.debounce(() => { if (!narrow()) TMD.$('#navScrim').hidden = true; }, 150) : () => {});
 
