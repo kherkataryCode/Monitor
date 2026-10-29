@@ -52,7 +52,7 @@
     });
     const hdrRow = r;
     sheet.headers.forEach((h, c) => { if (!h.blank) ws[enc({ r, c })] = { t: 's', v: h.label }; });
-    const calc = opts.calcCols ? calcExportCols() : [];
+    const calc = opts.calcDefs ? opts.calcDefs : opts.calcCols ? calcExportCols() : [];
     calc.forEach((cc, j) => { ws[enc({ r, c: sheet.headers.length + j })] = { t: 's', v: cc.label }; });
     r++;
     rows.forEach((rec) => {
@@ -144,7 +144,7 @@
       const recs = o.scope === 'full' ? st.records : st.records.filter((r) => scopeSet.has(r.id));
       if (o.summary) X.utils.book_append_sheet(out, aoaSheet(summaryAoa(recs), [40, 18, 40]), uniqueName('Dashboard Summary', used));
       if (o.dq) {
-        const list = TMD.dataQuality.collect().filter((x) => !x.rec || recs.indexOf(x.rec) >= 0);
+        const list = TMD.dataQuality.collect('tender').filter((x) => !x.rec || recs.indexOf(x.rec) >= 0);
         X.utils.book_append_sheet(out, aoaSheet([['Severity', 'Worksheet', 'Row', 'Tender identifier', 'Affected field', 'Problem', 'Suggested correction']].concat(list.map((x) => [x.sev, x.sheet, x.rowNum, x.ident, x.field, x.msg, x.suggestion])), [10, 16, 6, 24, 24, 60, 50]), uniqueName('Data Quality Report', used));
       }
       if (o.audit) X.utils.book_append_sheet(out, aoaSheet(TMD.audit.toAoa(), [20, 18, 16, 16, 6, 24, 28, 40, 40]), uniqueName('Audit Log', used));
@@ -291,12 +291,13 @@ ${st.workbook.isDemo ? '<div class="demo">DEMONSTRATION DATA — fictitious samp
 </body></html>`;
   }
 
-  function managementSummary() {
-    const html = summaryHtml();
+  function managementSummary() { showPrintable(summaryHtml(), 'Management summary', 'Management_Summary'); }
+  /** Preview a standalone HTML report in-page with Print / Download HTML / Close. */
+  function showPrintable(html, title, filePrefix) {
     const host = TMD.$('#printHost');
     // Render inside the page (no pop-ups, no iframes) for preview & printing.
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    host.innerHTML = `<div class="summary-view"><div class="summary-bar no-print"><strong>Management summary</strong><span class="muted">Printable HTML — use Print to save as PDF</span>
+    host.innerHTML = `<div class="summary-view"><div class="summary-bar no-print"><strong>${esc(title)}</strong><span class="muted">Printable HTML — use Print to save as PDF</span>
       <span class="sp"></span><button class="btn primary" data-s="print">${TMD.icon('printer')}<span>Print / Save as PDF</span></button><button class="btn" data-s="dl">${TMD.icon('download')}<span>Download HTML</span></button><button class="btn" data-s="close">${TMD.icon('x')}<span>Close</span></button></div>
       <div class="summary-doc">${doc.body.innerHTML}</div></div>`;
     document.body.classList.add('summary-open');
@@ -305,7 +306,7 @@ ${st.workbook.isDemo ? '<div class="demo">DEMONSTRATION DATA — fictitious samp
       const b = e.target.closest('[data-s]');
       if (!b) return;
       if (b.dataset.s === 'print') { document.body.classList.add('printing-custom'); window.print(); setTimeout(() => document.body.classList.remove('printing-custom'), 500); }
-      if (b.dataset.s === 'dl') TMD.downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), `Management_Summary_${TMD.stamp()}.html`);
+      if (b.dataset.s === 'dl') TMD.downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), `${filePrefix}_${TMD.stamp()}.html`);
       if (b.dataset.s === 'close') close();
     });
     const onKey = (e) => { if (e.key === 'Escape' && document.body.classList.contains('summary-open')) { close(); document.removeEventListener('keydown', onKey); } };
@@ -321,7 +322,10 @@ ${st.workbook.isDemo ? '<div class="demo">DEMONSTRATION DATA — fictitious samp
       { label: `Export selected rows to Excel… (${TMD.state.selection.size})`, icon: 'check', disabled: !TMD.state.selection.size, action: () => openDialog('selected') },
       { header: 'CSV' },
       { label: 'Export current sheet to CSV…', icon: 'file', disabled: !has, action: () => csvDialog() },
-      { label: 'Export audit log to CSV', icon: 'history', action: () => exportAuditCsv() },
+      { label: 'Export change log (audit log) to CSV', icon: 'history', action: () => exportAuditCsv() },
+      { header: 'Reports' },
+      { label: 'Monthly / quarterly report…', icon: 'calendar', disabled: !has, action: () => TMD.go('reports') },
+      { label: 'Tender report generator…', icon: 'columns', disabled: !has, action: () => { TMD.reportsTab = 'generator'; TMD.go('reports'); } },
       { header: 'Print & reports' },
       { label: 'Print dashboard / Save as PDF', icon: 'printer', action: printDashboard },
       { label: 'Management summary (printable HTML)', icon: 'file', disabled: !has, action: managementSummary },
@@ -329,5 +333,8 @@ ${st.workbook.isDemo ? '<div class="demo">DEMONSTRATION DATA — fictitious samp
     ], { alignRight: true });
   }
 
+  TMD.xlsxWriters = { writeLoadedSheet, writeRawSheet, aoaSheet, uniqueName };
+  TMD.showPrintable = showPrintable;
+  TMD.reportCss = () => (/<style>([\s\S]*?)<\/style>/.exec(summaryHtml()) || [])[1] || '';
   TMD.exporter = { openDialog, exportExcel, csvDialog, exportAuditCsv, printDashboard, managementSummary, exportMenu, summaryHtml };
 })();

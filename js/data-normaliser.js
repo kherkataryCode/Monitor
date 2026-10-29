@@ -60,8 +60,19 @@
     daysToOpening: { label: 'Days to Opening (source)', type: 'number' },
     statusFlag: { label: 'Status Flag', type: 'cat' },
     quickStatus: { label: 'Quick Status', type: 'cat' },
+    officer: { label: 'Officer', type: 'cat' },
+    statusRemark: { label: 'Current Status Remark', type: 'longtext' },
+    nextActionDate: { label: 'Next Action Date', type: 'date' },
+    statusUpdated: { label: 'Status Updated On', type: 'date' },
   };
   TMD.STD = STD;
+  // Columns the app adds to tender worksheets when they are not already present (exported as normal columns).
+  const TENDER_ADDED = [
+    { std: 'officer', label: 'Officer' },
+    { std: 'statusRemark', label: 'Current Status Remark' },
+    { std: 'nextActionDate', label: 'Next Action Date' },
+    { std: 'statusUpdated', label: 'Status Updated On' },
+  ];
 
   // Ordered header-recognition rules (first match wins; each field used once per sheet).
   const RULES = [
@@ -79,6 +90,10 @@
     [/^pr\s*(no|number|#)/, 'prNo'],
     [/proposal/, 'proposalName'],
     [/job\s*desc|^description|scope\s*of\s*work/, 'jobDescription'],
+    [/current\s*status\s*remark|status\s*remark/, 'statusRemark'],
+    [/status\s*(updated|update\s*date|as\s*on)|last\s*updated/, 'statusUpdated'],
+    [/next\s*(action|follow[\s-]*up|review)\s*date|action\s*due\s*date/, 'nextActionDate'],
+    [/officer|dealing\s*(person|hand)|in[\s-]*charge/, 'officer'],
     [/status\s*flag/, 'statusFlag'],
     [/quick\s*status/, 'quickStatus'],
     [/^status\b|current\s*status/, 'status'],
@@ -116,26 +131,30 @@
   const normLabel = (s) => String(s === null || s === undefined ? '' : s).replace(/\s+/g, ' ').trim().toLowerCase();
   TMD.normLabel = normLabel;
 
-  TMD.matchStd = function (label) {
+  function matchWith(rules, label) {
     const l = normLabel(label);
     if (!l || l.indexOf('[calc]') === 0) return null; // calculated columns from an earlier export are never mapped
-    for (const [re, f] of RULES) if (re.test(l)) return f;
+    for (const [re, f] of rules) if (re.test(l)) return f;
     return null;
-  };
-
-  /** Build the std → key mapping for a header list (respecting saved overrides). */
-  TMD.autoMapping = function (headers) {
+  }
+  TMD.matchStd = (label) => matchWith(RULES, label);
+  function autoMapWith(rules, dupMap, headers) {
     const map = {};
     headers.forEach((h) => {
-      let f = TMD.matchStd(h.label);
+      let f = matchWith(rules, h.label);
       if (!f) return;
       if (map[f]) {
-        if (f === 'prNo' && !map.prNo2) f = 'prNo2';
-        else if (f === 'remarks' && !map.remarksAny) f = 'remarksAny';
-        else return;
+        const alt = dupMap && dupMap[f];
+        if (alt && !map[alt]) f = alt; else return;
       }
       map[f] = h.key;
     });
+    return map;
+  }
+
+  /** Build the std → key mapping for a header list (respecting saved overrides). */
+  TMD.autoMapping = function (headers) {
+    const map = autoMapWith(RULES, { prNo: 'prNo2', remarks: 'remarksAny' }, headers);
     // A sheet with only "Remarks (if any)" uses it as its main remarks field too.
     return map;
   };
@@ -317,13 +336,30 @@
   };
 
   const ID_STD = new Set(['wbs', 'prNo', 'prNo2', 'crfq', 'poNo', 'srNo']);
-  const DATE_STD = new Set(['capexFinish', 'prSentDate', 'floatDate', 'prebidDate', 'openingDate', 'actualOpeningDate', 'techEvalDate', 'priceBidDate', 'tecApprovalDate', 'awardDate', 'validity']);
+  const DATE_STD = new Set(['nextActionDate', 'statusUpdated', 'capexFinish', 'prSentDate', 'floatDate', 'prebidDate', 'openingDate', 'actualOpeningDate', 'techEvalDate', 'priceBidDate', 'tecApprovalDate', 'awardDate', 'validity']);
   const MILESTONE_STD = new Set(['sentToProcurement', 'fat', 'sat', 'installation', 'handover']);
   TMD.DATE_STD = DATE_STD; TMD.MILESTONE_STD = MILESTONE_STD; TMD.ID_STD = ID_STD;
 
+  /**
+   * A mapper bundles everything that is specific to one module's data model.
+   * Modules (Tender Monitoring, Cyber Security Audits) each have their own mapper.
+   */
+  TMD.makeMapper = function (def) {
+    const m = Object.assign({ idStd: new Set(), dateStd: new Set(), msStd: new Set(), dupMap: {}, added: [], recognise: () => 'Worksheet' }, def);
+    m.matchStd = (label) => matchWith(m.rules, label);
+    m.autoMapping = def.autoMapping || ((headers) => autoMapWith(m.rules, m.dupMap, headers));
+    return m;
+  };
+  TMD.tenderMapper = TMD.makeMapper({
+    id: 'tender', STD, rules: RULES, idStd: ID_STD, dateStd: DATE_STD, msStd: MILESTONE_STD, dupMap: { prNo: 'prNo2', remarks: 'remarksAny' },
+    added: TENDER_ADDED, autoMapping: (h) => TMD.autoMapping(h), recognise: (n, m) => TMD.recogniseSheet(n, m),
+    addTo: (type) => /tracker|monitoring|tender list/i.test(type),
+  });
+
   /** Is a header (or mapped field) an identifier column that must stay text? */
-  function isIdentifierHeader(h, std) {
-    if (std && ID_STD.has(std)) return true;
+  function isIdentifierHeader(h, std, mp) {
+    if (std && mp.idStd.has(std)) return true;
+    if (std && mp.STD[std] && mp.STD[std].type !== 'id' && mp.STD[std].type !== 'text') return false;
     return /\b(no|number|id|code|ref)\b\.?$|\bno\.?\b|\bid\b/.test(h.norm) && !/days|duration|cost|value|amount|qty|quantity/.test(h.norm);
   }
 
@@ -334,6 +370,8 @@
    */
   TMD.buildSheet = function (name, raw, opts) {
     const o = Object.assign({ headerRow: null, minFilled: 2, skipInsufficient: true }, opts || {});
+    const mp = o.mapper || TMD.tenderMapper;
+    const STD = mp.STD, DATE_STD = mp.dateStd, MILESTONE_STD = mp.msStd;
     const aoa = raw.aoa || [];
     const headerRow = o.headerRow === null || o.headerRow === undefined ? TMD.detectHeaderRow(aoa) : o.headerRow;
     const rowOffset = raw.rowOffset || 0;
@@ -344,12 +382,27 @@
       for (let c = row.length - 1; c >= 0; c--) if (row[c] !== null && row[c] !== '') { nCols = Math.max(nCols, c + 1); break; }
     });
     const headers = TMD.buildHeaders(aoa[headerRow], nCols);
-    const savedMap = TMD.ls.get('mapping.' + TMD.sheetSignature(name, headers), null);
-    const mapping = savedMap || TMD.autoMapping(headers);
+    const sig = TMD.sheetSignature(name, headers);
+    const savedMap = TMD.ls.get((mp.id === 'tender' ? 'mapping.' : 'mapping.' + mp.id + '.') + sig, null);
+    const mapping = savedMap || mp.autoMapping(headers);
+    // App-added columns (e.g. Officer, Current Status Remark) for recognised worksheets that lack them
+    const preType = mp.recognise(name, mapping);
+    const addedCols = [];
+    if (mp.added.length && mp.addTo && mp.addTo(preType)) {
+      mp.added.forEach((a) => {
+        if (mapping[a.std]) return;
+        let key = a.label.replace(/[^A-Za-z0-9]+/g, '_');
+        while (headers.some((h) => h.key === key)) key += '_x';
+        const h = { index: 100000 + headers.length, label: a.label, blank: false, base: key, norm: normLabel(a.label), key, display: a.label, added: true };
+        headers.push(h);
+        mapping[a.std] = key;
+        addedCols.push(a.label);
+      });
+    }
     const stdByKey = {};
     Object.keys(mapping).forEach((f) => { stdByKey[mapping[f]] = f; });
 
-    const idKeys = new Set(headers.filter((h) => isIdentifierHeader(h, stdByKey[h.key])).map((h) => h.key));
+    const idKeys = new Set(headers.filter((h) => isIdentifierHeader(h, stdByKey[h.key], mp)).map((h) => h.key));
     const report = {
       sheet: name, headerRow: headerRow + rowOffset + 1, blankRows: 0, insufficientRows: [], skippedRows: 0,
       blankHeaders: headers.filter((h) => h.blank).map((h) => TMD.colLetter(h.index)),
@@ -381,7 +434,7 @@
         const hint = raw.hints && raw.hints[r + ':' + h.index];
         if (hint) dateHints[h.key] = hint;
       });
-      rows.push({ id: TMD.uid('r'), sheet: name, rowNum: excelRow, values, dateHints, edited: false, editedKeys: [], isNew: false, override: null, followUps: [] });
+      rows.push({ id: TMD.uid('r'), mod: mp.id, sheet: name, rowNum: excelRow, values, dateHints, edited: false, editedKeys: [], isNew: false, override: null, followUps: [] });
     }
 
     // Column profiling
@@ -428,15 +481,16 @@
     if (report.serialDates.length) report.warnings.push(`${report.serialDates.length} numeric value(s) in date columns look like Excel serial dates. Source values are kept; they are interpreted as dates for monitoring only.`);
     if (report.invalidDates.length) report.warnings.push(`${report.invalidDates.length} value(s) in date columns could not be read as valid dates.`);
     if (report.insufficientRows.length) report.warnings.push(`${report.insufficientRows.length} row(s) have fewer than ${o.minFilled} filled cells${o.skipInsufficient ? ' and were not loaded' : ''} (rows ${report.insufficientRows.slice(0, 15).join(', ')}${report.insufficientRows.length > 15 ? '…' : ''}).`);
+    if (addedCols.length) report.warnings.push(`Columns added by the application (not in the source file): ${addedCols.join(', ')}. They are included when you export.`);
     if (headerRow > 0) report.warnings.push(`${headerRow} title/blank row(s) above the header were detected and preserved for export.`);
 
     const preHeader = aoa.slice(0, headerRow).map((r) => (r ? r.slice(0, Math.max(nCols, r.length)) : null));
     const merges = (raw.merges || []).filter((m) => m.e.r < headerRow);
-    const sheetType = TMD.recogniseSheet(name, mapping);
+    const sheetType = mp.recognise(name, mapping);
     report.rows = rows.length; report.columns = headers.length; report.sheetType = sheetType;
     return {
-      name, headerRow, rowOffset, preHeader, merges, headers, mapping, mappingSaved: !!savedMap, colMeta, rows, report, sheetType,
-      friendly: TMD.ls.get('friendly.' + TMD.sheetSignature(name, headers), {}),
+      name, mod: mp.id, headerRow, rowOffset, preHeader, merges, headers, mapping, mappingSaved: !!savedMap, colMeta, rows, report, sheetType, addedCols,
+      friendly: TMD.ls.get((mp.id === 'tender' ? 'friendly.' : 'friendly.' + mp.id + '.') + sig, {}),
     };
   };
 
@@ -450,6 +504,8 @@
 
   /** Re-derive column metadata after the user changes the mapping. */
   TMD.applyMapping = function (sheet, mapping) {
+    const mp = TMD.mapperOf(sheet);
+    const STD = mp.STD, DATE_STD = mp.dateStd, MILESTONE_STD = mp.msStd;
     sheet.mapping = mapping;
     const stdByKey = {};
     Object.keys(mapping).forEach((f) => { if (mapping[f]) stdByKey[mapping[f]] = f; });
@@ -463,6 +519,19 @@
         if (STD[std].type === 'amount') m.unit = TMD.unitFromHeader(h.label);
       }
     });
-    sheet.sheetType = TMD.recogniseSheet(sheet.name, mapping);
+    sheet.sheetType = mp.recognise(sheet.name, mapping);
+  };
+  TMD.mapperOf = (sheet) => (sheet && sheet.mod === 'cyber' && TMD.cyberMapper) || TMD.tenderMapper;
+
+  /** Append a new (user-created) column to a loaded sheet. Returns the header. */
+  TMD.addColumn = function (sheet, label, type) {
+    let key = String(label).replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'New_Column';
+    while (sheet.headers.some((h) => h.key === key)) key += '_x';
+    const h = { index: 100000 + sheet.headers.length, label, blank: false, base: key, norm: normLabel(label), key, display: label, added: true, userAdded: true };
+    sheet.headers.push(h);
+    const isDate = type === 'date';
+    sheet.colMeta[key] = { std: null, type: type || 'text', isDate, isNumeric: type === 'number', isId: false, unit: null, nonBlank: 0, serials: 0, invalid: 0 };
+    sheet.rows.forEach((r) => { r.values[key] = null; });
+    return h;
   };
 })();

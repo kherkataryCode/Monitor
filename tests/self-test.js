@@ -76,6 +76,46 @@
   t('Source values unchanged by calculations', 'Technical evaluation completed; price bid opened; award under processing', by('Capex', 1).values.STATUS);
   t('Original snapshot stored', true, !!TMD.state.workbook.original.Capex[by('Capex', 1).id]);
 
+  // Officer / status follow-up columns and management status (tender enhancement)
+  t('Header mapping: "Officer"', 'officer', TMD.matchStd('Officer'));
+  t('Header mapping: "Current Status Remark"', 'statusRemark', TMD.matchStd('Current Status Remark'));
+  t('Header mapping: "Next Action Date"', 'nextActionDate', TMD.matchStd('Next Action Date'));
+  t('Header mapping: "Status Updated On"', 'statusUpdated', TMD.matchStd('Status Updated On'));
+  const capex = TMD.state.workbook.sheets.Capex;
+  t('App-added columns appended to tender sheets', ['Officer', 'Current Status Remark', 'Next Action Date', 'Status Updated On'].every((l) => capex.headers.some((h) => h.added && h.label === l)), true);
+  t('App-added columns are mapped', ['officer', 'statusRemark', 'nextActionDate', 'statusUpdated'].every((f) => !!capex.mapping[f]), true);
+  t('Every tender has a management status', true, TMD.state.records.every((r) => r.calc.mgmt && r.calc.mgmt.name));
+  t('Management status of Demo Capex #1', 'Award Stage', by('Capex', 1).calc.mgmt.name);
+  (function () {
+    const r = by('Capex', 1);
+    const k = capex.mapping.nextActionDate;
+    const old = r.values[k];
+    const y = new Date(TMD.today().getTime() - 3 * TMD.DAY);
+    r.values[k] = TMD.fmtDate(y);
+    TMD.recalcRecord(r);
+    t('Next action date in the past raises a status follow-up alert', true, r.calc.alerts.some((a) => a.statusDue && a.type === 'Status action date overdue'));
+    r.values[k] = old; TMD.recalcRecord(r);
+  })();
+
+  // Cyber Security Audit module
+  const CM = TMD.modules.cyber;
+  t('Cyber mapping: "Observation ID"', 'obsId', TMD.cyberMapper.matchStd('Observation ID'));
+  t('Cyber mapping: "Revised Target Date"', 'revisedTarget', TMD.cyberMapper.matchStd('Revised Target Date'));
+  t('Cyber mapping: "Action Owner"', 'owner', TMD.cyberMapper.matchStd('Action Owner'));
+  t('Severity normalisation', ['Critical', 'High', 'Medium', 'Low', 'Unclassified'], ['Very High', 'major', 'Moderate', 'minor', ''].map((v) => TMD.normSeverity(v).sev));
+  const cwb = TMD.buildWorkbook(TMD.sampleToRaw(TMD.CYBER_SAMPLE), { fileName: 'demo', fileSize: 0, isDemo: true, sourceType: 'demo' }, { sheets: ['Observations'], minFilled: 2, skipInsufficient: true }, CM);
+  CM.install(cwb, ['Observations']);
+  const cr = CM.state.records;
+  t('Cyber demo observations loaded (title rows skipped)', 42, cr.length);
+  t('Cyber records belong to the cyber module', true, cr.every((r) => r.mod === 'cyber'));
+  t('Tender data untouched by cyber import', 43, TMD.state.records.length);
+  t('Closed observations are never overdue', true, cr.filter((r) => r.calc.closed).every((r) => !r.calc.overdue));
+  t('Overdue uses revised target when present', true, cr.filter((r) => r.calc.hasRevised && !r.calc.closed).every((r) => r.calc.overdue === (r.calc.d.revised < TMD.today())));
+  t('Original status preserved alongside calculated status', true, cr.every((r) => r.calc.originalStatus === String(TMD.getStd(r, 'currentStatus') || TMD.getStd(r, 'closureStatus') || '').trim()));
+  t('Every observation has an ageing bucket', true, cr.every((r) => !!r.calc.ageBucket));
+  t('Severity defaults to Unclassified, never invented', true, cr.filter((r) => !r.calc.severitySource).every((r) => r.calc.severity === 'Unclassified'));
+  t('No suggested severity unless enabled in Settings', true, cr.every((r) => r.calc.suggestedSeverity === null));
+
   document.getElementById('out').innerHTML = rows.join('');
   const sum = document.getElementById('sum');
   sum.textContent = `${pass} passed, ${fail} failed (system date ${TMD.fmtDate(TMD.today())})`;

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-/* Generates sample-data/Tender Tracker v1.0.xlsx and sample-data/tender-sample.csv
- * from js/sample-data.js using the locally bundled SheetJS build.
+/* Generates sample-data/Tender Tracker v1.0.xlsx, sample-data/tender-sample.csv,
+ * sample-data/Cyber Security Audit Tracker.xlsx and sample-data/Cyber_Audit_Tracker.csv
+ * from js/sample-data.js and js/cyber-sample-data.js using the locally bundled SheetJS build.
  * Usage:  node tools/build-samples.js           (no network access required) */
 'use strict';
 const fs = require('fs');
@@ -8,6 +9,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const XLSX = require(path.join(ROOT, 'lib', 'xlsx.full.min.js'));
 const SAMPLE = require(path.join(ROOT, 'js', 'sample-data.js'));
+const CYBER = require(path.join(ROOT, 'js', 'cyber-sample-data.js'));
 
 const serialOf = (y, m, d) => Date.UTC(y, m - 1, d) / 86400000 + 25569;
 function cellOf(v, isIdCol) {
@@ -18,8 +20,9 @@ function cellOf(v, isIdCol) {
   return { t: 's', v: String(v) };
 }
 
+function buildWorkbook(sample, file) {
 const wb = XLSX.utils.book_new();
-SAMPLE.sheets.forEach((sh) => {
+sample.sheets.forEach((sh) => {
   const ws = {};
   let r = 0;
   const merges = [];
@@ -36,9 +39,12 @@ SAMPLE.sheets.forEach((sh) => {
   ws['!cols'] = sh.headers.map((h) => ({ wch: Math.max(10, Math.min(40, h.length + 2)) }));
   XLSX.utils.book_append_sheet(wb, ws, sh.name);
 });
-const out = path.join(ROOT, 'sample-data', 'Tender Tracker v1.0.xlsx');
+const out = path.join(ROOT, 'sample-data', file);
 fs.writeFileSync(out, Buffer.from(XLSX.write(wb, { type: 'array', bookType: 'xlsx', compression: true })));
 console.log('Wrote', out);
+}
+buildWorkbook(SAMPLE, 'Tender Tracker v1.0.xlsx');
+buildWorkbook(CYBER, 'Cyber Security Audit Tracker.xlsx');
 
 // CSV sample: the Capex sheet (duplicate "PR No" header, mixed dates) — UTF-8 with BOM
 const capex = SAMPLE.sheets.find((s) => s.name === 'Capex');
@@ -53,3 +59,10 @@ const lines = [capex.headers.map(q).join(',')].concat(capex.rows.map((row) => ro
 const csvPath = path.join(ROOT, 'sample-data', 'tender-sample.csv');
 fs.writeFileSync(csvPath, '﻿' + lines.join('\r\n'), 'utf8');
 console.log('Wrote', csvPath);
+
+// Cyber audit CSV: the Observations sheet
+const obs = CYBER.sheets.find((s) => s.name === 'Observations');
+const cLines = [obs.headers.map(q).join(',')].concat(obs.rows.map((row) => row.map((v) => q(fmt(v))).join(',')));
+const cPath = path.join(ROOT, 'sample-data', 'Cyber_Audit_Tracker.csv');
+fs.writeFileSync(cPath, '\ufeff' + cLines.join('\r\n'), 'utf8');
+console.log('Wrote', cPath);

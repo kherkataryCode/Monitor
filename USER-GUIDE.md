@@ -8,17 +8,18 @@ This guide walks through daily use. The application works completely offline. Yo
 
 | Area | Purpose |
 |------|---------|
-| **Header** | Title and logo, loaded **file name**, **selected worksheet(s)** (click to change), **record count**, **last import date/time**, privacy indicator, **mode badge** (VIEW MODE / EDIT MODE) and the buttons *Import Data, Refresh, Edit, Save\*, Cancel Editing\*, Export, Settings, Theme* (\* Edit Mode only). |
-| **Navigation** (left) | Dashboard · Tender Register · Timeline · Analytics · Alerts · Data Quality · Audit Log · Settings. The ☰ button collapses it. |
-| **Filter bar** (sticky) | Global search, AND / OR logic, *Advanced Filters*, *Presets*, *Clear all*, active filter chips and the “Showing X of Y records” counter. Filters stay active when you switch pages. |
+| **Header** (compact) | Sidebar button, logo and the title of the current module, a chip with the loaded **file · worksheet(s)** (click to change worksheets), *Demo data* tag, the offline indicator (“Offline Mode • Data remains on this device”), **Import**, **Export**, **Recalculate**, **Light / dark** and **Settings**. |
+| **Sidebar** (left) | Hidden to a slim icon rail by default — hover an icon for its name, click the sidebar button (top-left) to show / hide the labels. Sections: **Overview** (Home) · **Tender Monitoring** (Dashboard, Tender Register, Timeline, Analytics, Reports, Alerts) · **Cyber Security Audits** (Cyber Audit Dashboard, Observation Register, Action Tracker, Audit Analytics, Audit Alerts) · **System** (Data Quality, Audit Log, Settings). Red badges count alerts. |
+| **Filter bar** (sticky) | One per module: search, *Filters*, All / Any logic, *Presets*, *Clear*, filter chips and the record counter. Tender filters never affect audit data and vice versa. |
+| **Edit button** (bottom-left) | **View only — Click to unlock editing**. After unlocking it shows *Editing … · Unsaved changes / All changes saved* with **Undo**, **Redo**, **Save** and **Lock**. |
 
-A yellow **DEMONSTRATION DATA** banner is shown until you import your own workbook.
+A yellow **Demonstration data** banner is shown in a module until you import your own file into it.
 
 ---
 
 ## 2. Importing data
 
-1. Click **Import Data** (or drag a file anywhere onto the window).
+1. Open the module you want to load (Tender or Cyber Audit) and click **Import** (or drag a file anywhere onto the window). On Home or a System page you are asked which module to import into.
 2. Choose a `.xlsx`, `.xls` or `.csv` file. It is read locally and never uploaded.
 
 **Excel workbooks** — the *Select worksheets* dialog lists every worksheet with:
@@ -40,10 +41,16 @@ To switch the analysed worksheet(s) later, click the worksheet name in the heade
 
 ## 3. Dashboard
 
-* **KPI cards** (Portfolio, Tender pipeline, Value, Watch list) reflect the current filters. **Click any card** to open the Tender Register filtered to those records. Amount cards show an exact rupee tooltip.
-* **Needs attention now** lists high-severity alerts. **Next 14 days** lists upcoming milestones. Click an item to open the tender.
-* **15 charts**: stage, department, CAPEX vs REVEX, channel, initiator, estimated cost and awarded value by department, monthly floating and award trends, PR-to-PO and technical evaluation durations, upcoming milestones, delayed by stage, vendor-wise awarded value, completed vs pending. Click a bar or segment to filter. The ▦ icon shows the chart as a table.
-* **Management summary** opens a printable HTML report (print / save as PDF / download HTML). **Print / Save as PDF** prints the dashboard. In the print dialog, choose *Save as PDF* to create a PDF locally.
+* **Headline tiles**: Total tenders, In progress (floated → award), PO / OLA awarded (with value), Delayed, Status follow-up due. Click a tile to open the filtered register.
+* **CAPEX / REVEX**: split bar and side-by-side figures (tenders, open, awarded, delayed, estimated value, awarded value). Click a side to filter.
+* **Management status**: the configurable status groups (Pre-Tender, Under Tendering, Under Evaluation, Award Stage, Under Execution, Completed, On Hold / Dropped, Needs Attention — rename, recolour, re-map or add your own in *Settings → Management status*). Click a row to filter.
+* **Needs attention now**, **Status follow-up** (next action date overdue / due, status not updated recently) and **Next 14 days**.
+* **All indicators** (expand) holds all 30 clickable KPI cards.
+* **18 charts**: management status, CAPEX vs REVEX by status and by value, stage, department, officer workload, channel, estimated / awarded value by department, monthly floating and award trends, upcoming milestones, PR-to-PO and evaluation durations, delayed by stage, vendor-wise awarded value, completed vs pending, initiator. Click a bar or segment to filter; ▦ shows the chart as a table.
+* **Monthly / quarterly report**, **Management summary** and **Print** buttons.
+
+### Officer and status follow-up
+Every tender sheet gets four columns if the source does not already have them (they are marked “+” in the header and exported with your data): **Officer**, **Current Status Remark**, **Next Action Date** and **Status Updated On**. When you change STATUS or the Current Status Remark, *Status Updated On* is set to today automatically. Alerts are raised when the next action date is overdue or due within *N* days, or when the status has not been updated for *N* days (thresholds in Settings).
 
 ---
 
@@ -85,31 +92,29 @@ Use ‹ › to move between records and **Print** for a printable record sheet.
 
 ---
 
-## 6. Editing safely
+## 6. Editing safely (Excel-style)
 
-The application always opens in **VIEW MODE – Data is protected from editing**.
+The application always opens in **View Mode** — data is protected.
 
-1. Click **Edit** and confirm: *“You are entering Edit Mode. Changes will remain local until exported or downloaded.”*
-2. The badge changes to **EDIT MODE – Unsaved local changes**. Editable cells are tinted.
-3. Edit in the grid (double-click, Enter or F2; type to replace text) or in the details panel:
-   * dates: type `dd/mm/yyyy` or use the date picker,
-   * costs / durations: number input,
-   * Channel, Department, CAPEX/REVEX, Nature, Initiator: dropdown (or *Other…* for a new value),
-   * STATUS / Remarks / descriptions: multi-line editor (Ctrl+Enter saves).
-4. Each change is validated. Invalid dates are saved as typed but flagged. Stages, alerts, KPIs and charts recalculate immediately.
-5. **Add Row**, **Duplicate**, **Delete**, **Undo** (Ctrl+Z), **Redo** (Ctrl+Y) are in the register toolbar.
-6. **Manual stage override**: in the details panel, choose a stage and add a note. The calculated stage is still shown in the reason.
+1. Click the highlighted **View only — Click to unlock editing** button at the bottom-left and confirm.
+2. Edit **directly in the cells**, like Excel:
+   * click a cell and just start typing (replaces the value), or double-click / Enter / F2 to edit the existing text;
+   * **date cells** open with a date picker; an empty date cell is pre-filled with **today** (Enter accepts, *Today* button);
+   * Tab / Enter move to the next cell; Esc cancels;
+   * **fill handle**: select a cell (or range) and drag the small blue square at its bottom-right corner down / up / sideways. Numbers, dates and text ending in a number continue as a series (1, 2, 3 · 01/11, 02/11 · Item 1, Item 2); other values are copied. Hold **Alt / Option** to copy without a series;
+   * **paste** a range copied from Excel (Ctrl+V), **Ctrl+D** fills down, **Delete** clears the selection, Ctrl+X cuts;
+   * right-click a cell for *Edit, Copy, Paste, Fill down, Clear, Insert row above / below, Duplicate, Delete row, Add column*;
+   * the toolbar adds **Row**, **Column**, **Duplicate**, **Delete**.
+3. Each change is validated (invalid dates are kept as typed and flagged), recalculated immediately and written to the local change log. Edited cells have an amber corner.
+4. **Undo / Redo** (Ctrl+Z / Ctrl+Y) — a fill or paste is one undo step.
+5. **Save** (Ctrl+S): *Save Locally* (IndexedDB working copy, restored next time), *Export Updated Excel* or *Export CSV*.
+6. **Lock**: returns to View Mode; with unsaved changes choose *Discard*, *Continue editing* or *Save locally and exit*.
 
-**Save** (Ctrl+S) offers:
-* **Save Locally**: keeps a working copy in this browser (IndexedDB). It is restored automatically next time.
-* **Export Updated Excel**: downloads `Tender_Tracker_Updated_YYYY-MM-DD_HHMM.xlsx`.
-* **Export CSV**.
+**Header filters**: every column header has a filter button (appears on hover) with *Sort A → Z / Z → A*, a value checklist with search and (Select all), and *Clear filter*. Active header filters are highlighted and can be cleared from the toolbar.
 
-**Cancel Editing**: if there are unsaved changes, choose *Discard changes*, *Continue editing* or *Save locally and exit*.
+If the browser closes during editing, the next start offers to **recover** the unsaved changes. Tender and Cyber Audit edit sessions are independent.
 
-If the browser closes during editing, the next start offers to **recover** the unsaved changes (when local persistence is enabled).
-
-> The source workbook on your disk is never modified.
+> The source file on your disk is never modified.
 
 ---
 
@@ -159,7 +164,31 @@ The reason is always shown. Use a manual override when you know better.
 
 ---
 
-## 11. Troubleshooting
+## 11. Reports
+
+*Tender Monitoring → Reports* (or **Monthly / quarterly report** on the dashboard).
+
+* **Monthly / quarterly / financial-year report**: choose the period; the report lists headline figures, tenders floated, opened, evaluated, awarded, completed and delayed in that period, CAPEX vs REVEX and department breakdowns and the management-status split. Export to **Excel**, **HTML** or **Print / PDF**.
+* **Report generator**: title, records (filtered / all / selected), group by, sort, optional summary table, and **selectable columns** — add from the list on the right, reorder with ↑ ↓, remove with ×; *Management set* restores a sensible default. Save the configuration as a **template** on this device. Output: Excel, CSV, HTML, Print / PDF. A live preview is shown below.
+
+## 12. Cyber Security Audits
+
+A separate module with its own data source, filters, edit mode, change log and exports.
+
+* **Import Audit Data**: any audit observation tracker (.xlsx / .xls / .csv). Columns are recognised flexibly (Observation ID, Observation / Finding, Severity / Criticality / Risk, Location, Department, Action Owner, Target / Revised Target Date, Current Status, Evidence, Verification, Closure Date, Domain, Framework / Clause, …). **No column is mandatory** and nothing is invented. Mappings can be corrected in *Settings → Column mapping → Cyber Security Audits*.
+* **Cyber Audit Dashboard** (“Cyber Security Audit Monitoring — Audit Observations • Remediation • Compliance Tracking”): source strip, status summary, **closure progress** (Closed ÷ Total × 100; Closed includes Not Applicable and Risk Accepted), 17 clickable KPIs, **Management Attention** (explicit rules such as Critical + Open, High + Overdue, revised target exceeded, evidence pending beyond target, no owner, no target date, repeated, escalation), location view and audit-wise view, charts.
+* **Status**: a calculated 16-step lifecycle (New → Under Review → Action Plan … → Closed, plus Overdue, On Hold, Not Applicable, Risk Accepted, Needs Review). The **original status is always kept** and shown alongside. *Overdue* uses the revised target date when present, otherwise the target date; closed items are never overdue.
+* **Severity colours**: Critical (dark red), High (red), Medium (amber), Low (blue), Unclassified (grey). Optional suggested severities (Settings) are always labelled *Suggested* and never saved.
+* **Observation Register**: the same Excel-style grid (unlock editing, edit in cells, fill handle, header filters).
+* **Observation details**: remediation timeline (Raised → Action Plan → Remediation → Evidence → Verification → Closure), status, all fields, follow-ups and change history. **Quick Update** edits Current Status, Action Taken, Pending With, Target / Revised dates, Evidence Status, Last / Next Follow-up and Remarks in one form (*Save Locally*).
+* **Action Tracker**: immediate attention, due this week, due this month, overdue, awaiting evidence / verification / closure, no owner, no target date — with *Update* buttons and export.
+* **Audit Alerts**: sections with configurable thresholds (target approaching 7 / 15 / 30 / 60 days; long-open 30 / 60 / 90 / 180 / 365 days).
+* **Audit Analytics**: 18 charts (open vs closed, severity, location, department, audit, agency, domain, status, overdue by department / location, ageing 0–30 … >365 days, closure trend, raised vs closed, pending with, repeat, OT vs IT, evidence, compliance).
+* **Exports**: full register, filtered, open, overdue, closure report, management summary, action tracker, change log (Excel workbook sheets: Cyber Audit Register, Dashboard Summary, Open Observations, Overdue, Action Tracker, Data Quality, Change Log).
+
+The change history is a local convenience log — it is not cryptographically secured.
+
+## 13. Troubleshooting
 
 | Symptom | Remedy |
 |---------|--------|

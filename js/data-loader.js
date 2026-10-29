@@ -49,8 +49,9 @@
    * meta    : {fileName, fileSize, isDemo, sourceType}
    * choice  : {sheets:[names to load], headerRows:{name: idx}, minFilled, skipInsufficient, active:[names]}
    */
-  TMD.buildWorkbook = function (raw, meta, choice) {
-    const wb = {
+  TMD.buildWorkbook = function (raw, meta, choice, M) {
+    const mod = M || TMD.modules.tender;
+    const wb = { mod: mod.id,
       fileName: meta.fileName, fileSize: meta.fileSize || 0, isDemo: !!meta.isDemo, sourceType: meta.sourceType || 'xlsx',
       importedAt: Date.now(), sheetNames: raw.sheetNames.slice(), sheets: {}, raw: {}, original: {}, loadOrder: [],
     };
@@ -58,7 +59,7 @@
       if (choice.sheets.indexOf(name) >= 0) {
         const sh = TMD.buildSheet(name, raw.sheets[name], {
           headerRow: choice.headerRows && choice.headerRows[name] !== undefined ? choice.headerRows[name] : null,
-          minFilled: choice.minFilled || 2, skipInsufficient: choice.skipInsufficient !== false,
+          minFilled: choice.minFilled || 2, skipInsufficient: choice.skipInsufficient !== false, mapper: mod.mapper,
         });
         wb.sheets[name] = sh;
         wb.loadOrder.push(name);
@@ -86,7 +87,7 @@
     st.activeSheets.forEach((n) => { st.records = st.records.concat(st.workbook.sheets[n].rows); });
     TMD.buildColumns();
     TMD.recalcAll();
-    TMD.emit('data');
+    TMD.emit('data', { module: 'tender' });
   };
 
   /* ---------------- Grid column definitions for the active view ---------------- */
@@ -112,34 +113,52 @@
   ];
   TMD.CALC_COLS = CALC_COLS;
 
-  TMD.buildColumns = function () {
-    const st = TMD.state;
-    const cols = [
-      { id: '__stage', label: 'Current Stage (calculated)', kind: 'calc', type: 'stage', width: 210 },
-      { id: '__delay', label: 'Delay / Track', kind: 'calc', type: 'delay', width: 112 },
-    ];
-    if (st.activeSheets.length > 1) cols.push({ id: '__sheet', label: 'Worksheet', kind: 'calc', type: 'text', width: 120, get: (c, r) => r.sheet });
+  /** Union of source columns across the active worksheets of a state (shared by all modules). */
+  TMD.sourceColumns = function (st) {
+    const cols = [];
     const byId = {};
     st.activeSheets.forEach((name) => {
       const sh = st.workbook.sheets[name];
       const occ = {};
-      sh.headers.forEach((h) => {
-        const base = h.blank ? '#blank-' + TMD.colLetter(h.index) : h.norm;
+      sh.headers.forEach((h, pos) => {
+        const base = h.blank ? '#blank-' + TMD.colLetter(pos) : h.norm;
         occ[base] = (occ[base] || 0) + 1;
         const id = 'src:' + base + '#' + occ[base];
         const meta = sh.colMeta[h.key];
         if (!byId[id]) {
           const label = (sh.friendly && sh.friendly[h.key]) || h.display;
-          byId[id] = { id, label, sourceLabel: h.display, kind: 'source', keysBySheet: {}, type: meta.type, std: meta.std, isDate: meta.isDate, unit: meta.unit, width: defaultWidth(meta, h) };
+          byId[id] = { id, label, sourceLabel: h.display, kind: 'source', keysBySheet: {}, type: meta.type, std: meta.std, isDate: meta.isDate, unit: meta.unit, width: defaultWidth(meta, h), added: !!h.added, userAdded: !!h.userAdded };
           cols.push(byId[id]);
         }
         byId[id].keysBySheet[name] = h.key;
       });
     });
+    // Show app-added columns (Officer, Current Status Remark, …) right after the STATUS column.
+    const added = cols.filter((c) => c.added && !c.userAdded);
+    const anchorStd = ['status', 'remarks', 'jobDescription'].find((f) => cols.some((c) => c.std === f && !c.added));
+    if (added.length && anchorStd) {
+      const rest = cols.filter((c) => added.indexOf(c) < 0);
+      const at = rest.findIndex((c) => c.std === anchorStd) + 1;
+      rest.splice(at, 0, ...added);
+      return rest;
+    }
+    return cols;
+  };
+
+  TMD.buildColumns = function () {
+    const st = TMD.state;
+    const cols = [
+      { id: '__stage', label: 'Current Stage (calculated)', kind: 'calc', type: 'stage', width: 210 },
+      { id: '__delay', label: 'Delay / Track', kind: 'calc', type: 'delay', width: 118 },
+      { id: '__mgmt', label: 'Management Status', kind: 'calc', type: 'mgmt', width: 170, get: (c) => c.mgmt ? c.mgmt.name : '' },
+    ];
+    if (st.activeSheets.length > 1) cols.push({ id: '__sheet', label: 'Worksheet', kind: 'calc', type: 'text', width: 120, get: (c, r) => r.sheet });
+    TMD.sourceColumns(st).forEach((c) => cols.push(c));
     CALC_COLS.forEach((c) => cols.push({ id: c.id, label: c.label, kind: 'calc', type: c.type, width: c.w, get: c.get, hiddenByDefault: true }));
     st.columns = cols;
   };
   function defaultWidth(meta, h) {
+    if (h.added) return meta.type === 'longtext' ? 280 : meta.type === 'date' ? 140 : 150;
     if (meta.type === 'longtext') return 260;
     if (meta.type === 'date' || meta.type === 'milestone') return 116;
     if (meta.type === 'amount' || meta.type === 'number') return 120;
@@ -199,14 +218,15 @@
     return window.TMDReadWorkbook(window.XLSX, new Uint8Array(buffer));
   }
 
-  TMD.importFile = async function (file) {
+  TMD.importFile = async function (file, M) {
+    const mod = M || TMD.modules.tender;
     if (!file) return;
     const ext = extOf(file.name);
     if (['xlsx', 'xls', 'csv'].indexOf(ext) < 0) { TMD.toast('Unsupported file type. Please choose a .xlsx, .xls or .csv file.', 'error'); return; }
     if (file.size > MAX_BYTES) { TMD.toast('File is larger than 150 MB and cannot be processed in the browser.', 'error'); return; }
     if (file.size === 0) { TMD.toast('The selected file is empty.', 'error'); return; }
-    if (TMD.state.mode === 'edit' && TMD.state.dirty) {
-      const ok = await TMD.confirm('Unsaved changes', 'You have unsaved edits. Importing a new file will replace the working data. Continue?', 'Import anyway', 'danger');
+    if (mod.state.mode === 'edit' && mod.state.dirty) {
+      const ok = await TMD.confirm('Unsaved changes', `You have unsaved ${mod.label} edits. Importing a new file will replace that module's working data. Continue?`, 'Import anyway', 'danger');
       if (!ok) return;
     }
     try {
@@ -214,12 +234,12 @@
       const buffer = await file.arrayBuffer();
       const sigErr = validateSignature(ext, new Uint8Array(buffer.slice(0, 4096)));
       if (sigErr) { TMD.progress(false); TMD.toast(sigErr, 'error', 6000); return; }
-      if (ext === 'csv') { TMD.progress(false); await csvFlow(file, buffer); return; }
+      if (ext === 'csv') { TMD.progress(false); await csvFlow(file, buffer, mod); return; }
       TMD.progress(`Parsing workbook ${file.name} (${(file.size / 1024).toFixed(0)} KB)…`);
       const raw = await parseWorkbookBytes(buffer);
       TMD.progress(false);
       if (!raw.sheetNames.length) { TMD.toast('No worksheets were found in the workbook.', 'error'); return; }
-      await sheetSelectionFlow(raw, { fileName: file.name, fileSize: file.size, sourceType: ext });
+      await sheetSelectionFlow(raw, { fileName: file.name, fileSize: file.size, sourceType: ext }, null, mod);
     } catch (e) {
       console.error(e);
       TMD.progress(false);
@@ -228,25 +248,21 @@
   };
 
   /* ---------------- Worksheet selection dialog ---------------- */
-  async function sheetSelectionFlow(raw, meta, preselect) {
+  async function sheetSelectionFlow(raw, meta, preselect, mod) {
     const st = { headerRows: {}, minFilled: 2, skipInsufficient: true, summaries: {}, focus: null };
     const summarise = (name) => {
-      const sh = TMD.buildSheet(name, raw.sheets[name], { headerRow: st.headerRows[name], minFilled: st.minFilled, skipInsufficient: st.skipInsufficient });
+      const sh = TMD.buildSheet(name, raw.sheets[name], { headerRow: st.headerRows[name], minFilled: st.minFilled, skipInsufficient: st.skipInsufficient, mapper: mod.mapper });
       st.headerRows[name] = sh.headerRow;
       st.summaries[name] = sh;
       return sh;
     };
     raw.sheetNames.forEach(summarise);
-    const isTender = (n) => /tracker|monitoring|tender list/i.test(st.summaries[n].sheetType);
+    const isTender = (n) => mod.isRelevantSheet(st.summaries[n]);
     let pre = preselect || [];
     if (!pre.length) {
-      const def = TMD.settings.get('defaultSheet');
-      if (def && raw.sheets[def]) pre = [def];
-      else {
-        const cands = ['Capex', 'REVEX 2026'].filter((n) => raw.sheets[n]);
-        pre = cands.length ? cands : raw.sheetNames.filter(isTender).slice(0, 1);
-        if (!pre.length) pre = [raw.sheetNames[0]];
-      }
+      pre = mod.preselect(raw, st.summaries);
+      if (!pre.length) pre = raw.sheetNames.filter(isTender).slice(0, 1);
+      if (!pre.length) pre = [raw.sheetNames[0]];
     }
     const checked = new Set(pre);
     st.focus = pre[0];
@@ -291,13 +307,13 @@
       const note = body.querySelector('#compatNote');
       const names = Array.from(checked);
       if (names.length < 2) { note.innerHTML = ''; return; }
-      const core = ['channel', 'department', 'prNo', 'prSentDate', 'jobDescription', 'crfq', 'floatDate', 'openingDate', 'techEvalDate', 'poNo', 'awardDate', 'validity', 'vendor'];
+      const core = mod.compatFields;
       const sets = names.map((n) => new Set(core.filter((f) => st.summaries[n].mapping[f])));
       const common = core.filter((f) => sets.every((s) => s.has(f)));
-      const ok = common.length >= 7;
+      const ok = common.length >= Math.min(7, Math.ceil(core.length / 2));
       note.innerHTML = ok
         ? `<div class="notice ok">${TMD.icon('check')} The selected sheets share ${common.length} standard monitoring fields and can be consolidated. Source columns remain separate; unmatched columns appear blank for other sheets.</div>`
-        : `<div class="notice warn">${TMD.icon('alert')} The selected sheets share only ${common.length} standard fields. They will be loaded, but the dashboard will analyse them one at a time — choose which in the worksheet switcher. Consolidation requires at least 7 shared fields.</div>`;
+        : `<div class="notice warn">${TMD.icon('alert')} The selected sheets share only ${common.length} standard fields. They will be loaded, but the dashboard will analyse them one at a time — choose which in the worksheet switcher.</div>`;
       st.compatible = ok;
     };
     body.addEventListener('change', (e) => {
@@ -321,7 +337,7 @@
     });
     render();
     const res = await TMD.modal({
-      title: 'Select worksheets to load', body, xwide: true,
+      title: `${mod.label}: select worksheet(s) to load`, body, xwide: true,
       buttons: [{ label: 'Cancel', value: null }, { label: 'Load selected worksheets', value: 'load', kind: 'primary' }],
       beforeClose: (v) => { if (v === 'load' && !checked.size) { TMD.toast('Select at least one worksheet.', 'warn'); return false; } return true; },
     });
@@ -329,18 +345,18 @@
     const names = raw.sheetNames.filter((n) => checked.has(n));
     TMD.progress('Building monitoring model…');
     await TMD.nextFrame();
-    const wb = TMD.buildWorkbook(raw, meta, { sheets: names, headerRows: st.headerRows, minFilled: st.minFilled, skipInsufficient: st.skipInsufficient });
+    const wb = TMD.buildWorkbook(raw, meta, { sheets: names, headerRows: st.headerRows, minFilled: st.minFilled, skipInsufficient: st.skipInsufficient }, mod);
     const active = st.compatible === false ? [names[0]] : names;
-    finishImport(wb, active);
+    finishImport(wb, active, mod);
   }
 
-  function finishImport(wb, active) {
-    if (TMD.state.mode === 'edit' && TMD.editMode) TMD.editMode.forceExit();
-    TMD.installWorkbook(wb, active);
-    TMD.audit.log({ action: 'IMPORT', sheet: wb.loadOrder.join(', '), field: '', oldValue: '', newValue: `${wb.fileName} (${TMD.state.records.length} records)` });
+  function finishImport(wb, active, mod) {
+    if (mod.state.mode === 'edit' && mod.edit) mod.edit.forceExit();
+    mod.install(wb, active);
+    mod.audit.log({ action: 'IMPORT', sheet: wb.loadOrder.join(', '), field: '', oldValue: '', newValue: `${wb.fileName} (${mod.state.records.length} records)` });
     TMD.progress(false);
-    TMD.toast(`Loaded ${TMD.plural(TMD.state.records.length, 'record')} from ${wb.fileName}. View Mode is active.`, 'success');
-    if (TMD.settings.get('persistence')) TMD.saveWorkingCopy('working');
+    TMD.toast(`${mod.label}: loaded ${TMD.plural(mod.state.records.length, 'record')} from ${wb.fileName}. View Mode is active.`, 'success');
+    if (TMD.settings.get('persistence')) TMD.saveWorkingCopy(mod.slots.working, mod);
     TMD.showImportReport(wb);
   }
 
@@ -355,7 +371,7 @@
     return { text, enc };
   }
 
-  async function csvFlow(file, buffer) {
+  async function csvFlow(file, buffer, mod) {
     const { text, enc } = decodeText(buffer);
     const st = { delimiter: '', headerRow: null };
     let parsed = null;
@@ -395,26 +411,27 @@
       if (e.target.id === 'csvHdr') { st.headerRow = Math.max(0, Math.min(st.rows.length - 1, (parseInt(e.target.value, 10) || 1) - 1)); render(); }
     });
     render();
-    const res = await TMD.modal({ title: 'CSV import preview', body, xwide: true, buttons: [{ label: 'Cancel', value: null }, { label: 'Load data', value: 'load', kind: 'primary' }] });
+    const res = await TMD.modal({ title: `${mod.label}: CSV import preview`, body, xwide: true, buttons: [{ label: 'Cancel', value: null }, { label: 'Load data', value: 'load', kind: 'primary' }] });
     if (res !== 'load') return;
     const name = file.name.replace(/\.csv$/i, '').slice(0, 31) || 'CSV';
     const raw = { sheetNames: [name], sheets: { [name]: { aoa: st.rows, hints: {}, merges: [], rowOffset: 0 } } };
     TMD.progress('Building monitoring model…');
     await TMD.nextFrame();
-    const wb = TMD.buildWorkbook(raw, { fileName: file.name, fileSize: file.size, sourceType: 'csv' }, { sheets: [name], headerRows: { [name]: st.headerRow }, minFilled: 2, skipInsufficient: true });
+    const wb = TMD.buildWorkbook(raw, { fileName: file.name, fileSize: file.size, sourceType: 'csv' }, { sheets: [name], headerRows: { [name]: st.headerRow }, minFilled: 2, skipInsufficient: true }, mod);
     wb.csvMeta = { encoding: enc, delimiter: delimName(parsed.meta.delimiter) };
-    finishImport(wb, [name]);
+    finishImport(wb, [name], mod);
   }
 
   /** Re-open the worksheet chooser for the current workbook (load additional sheets). */
-  TMD.manageSheets = async function () {
-    const wb = TMD.state.workbook;
+  TMD.manageSheets = async function (M) {
+    const mod = M || TMD.modules.tender;
+    const wb = mod.state.workbook;
     if (!wb) return;
     const loaded = wb.loadOrder;
     const body = TMD.el('div');
     body.innerHTML = `<p class="muted">Choose which loaded worksheet(s) feed the dashboard. Worksheets not loaded at import are preserved untouched for export${Object.keys(wb.raw).length ? ' and can be loaded below' : ''}.</p>
       <table class="data-table"><thead><tr><th>Active</th><th>Worksheet</th><th>Recognised as</th><th class="num">Records</th></tr></thead><tbody>
-      ${loaded.map((n) => `<tr><td><input type="checkbox" class="act-chk" value="${esc(n)}" ${TMD.state.activeSheets.indexOf(n) >= 0 ? 'checked' : ''}></td><td>${esc(n)}</td><td>${esc(wb.sheets[n].sheetType)}</td><td class="num">${wb.sheets[n].rows.length}</td></tr>`).join('')}
+      ${loaded.map((n) => `<tr><td><input type="checkbox" class="act-chk" value="${esc(n)}" ${mod.state.activeSheets.indexOf(n) >= 0 ? 'checked' : ''}></td><td>${esc(n)}</td><td>${esc(wb.sheets[n].sheetType)}</td><td class="num">${wb.sheets[n].rows.length}</td></tr>`).join('')}
       ${Object.keys(wb.raw).map((n) => `<tr class="muted"><td><input type="checkbox" class="load-chk" value="${esc(n)}"></td><td>${esc(n)} <span class="tag">not loaded</span></td><td>—</td><td class="num">—</td></tr>`).join('')}
       </tbody></table>`;
     const res = await TMD.modal({ title: 'Worksheets', body, wide: true, buttons: [{ label: 'Cancel', value: null }, { label: 'Apply', value: 'ok', kind: 'primary' }] });
@@ -422,14 +439,14 @@
     const act = TMD.$$('.act-chk', body).filter((c) => c.checked).map((c) => c.value);
     const toLoad = TMD.$$('.load-chk', body).filter((c) => c.checked).map((c) => c.value);
     toLoad.forEach((n) => {
-      const sh = TMD.buildSheet(n, wb.raw[n], {});
+      const sh = TMD.buildSheet(n, wb.raw[n], { mapper: mod.mapper });
       wb.sheets[n] = sh; wb.loadOrder.push(n); delete wb.raw[n];
       wb.original[n] = {};
       sh.rows.forEach((r) => { wb.original[n][r.id] = { values: Object.assign({}, r.values), dateHints: Object.assign({}, r.dateHints) }; });
       act.push(n);
     });
     if (!act.length) { TMD.toast('At least one worksheet must be active.', 'warn'); return; }
-    TMD.setActiveSheets(act);
+    mod.setActiveSheets(act);
     TMD.toast(`Active worksheet(s): ${act.join(', ')}`, 'info');
   };
 
@@ -450,7 +467,7 @@
 
   /* ---------------- Import report ---------------- */
   TMD.showImportReport = function (wb) {
-    wb = wb || TMD.state.workbook;
+    wb = wb || (TMD.activeModule ? TMD.activeModule().state.workbook : TMD.state.workbook);
     if (!wb) return;
     const list = (arr, fmt, max) => (arr.length ? `<ul class="compact-list">${arr.slice(0, max || 12).map(fmt).join('')}${arr.length > (max || 12) ? `<li class="muted">… and ${arr.length - (max || 12)} more</li>` : ''}</ul>` : '<span class="muted">None</span>');
     const sheets = wb.loadOrder.map((n) => {
@@ -477,7 +494,7 @@
     }).join('');
     const notLoaded = Object.keys(wb.raw);
     TMD.modal({
-      title: 'Data import report', xwide: true,
+      title: `Data import report — ${(TMD.modules[wb.mod || 'tender'] || {}).label || ''}`, xwide: true,
       body: `<div class="kv-grid">
           <div class="kv"><span>File name</span><strong>${esc(wb.fileName)}</strong></div>
           <div class="kv"><span>File size</span><strong>${wb.fileSize ? (wb.fileSize / 1024).toFixed(1) + ' KB' : '—'}</strong></div>
