@@ -38,7 +38,7 @@
     fyStartMonth: 4,                // April
     currency: '₹',
     amountUnit: 'lakh',             // rupees | lakh | crore
-    density: 'compact',             // compact | comfortable
+    density: 'comfortable',         // compact | comfortable | wrap
     frozenCols: 2,
     persistence: true,              // IndexedDB working copy + recovery
     // Units for amount columns whose header does not state a unit
@@ -59,6 +59,18 @@
     thrDelivery: 60,
     thrInstall: 45,
     thrUpcoming: 30,
+    thrNextAction: 7,
+    thrStale: 30,
+    mgmtStatuses: null,           // null → defaults (see calculations.js)
+    mgmtDelayedTo: 'attention',   // show delayed tenders under this management status ('' = off)
+    navExpanded: false,
+    cyberFrozenCols: 3,
+    cyberThrTarget: 30,           // "target date approaching" window (days)
+    cyberThrLongOpen: 90,         // "long pending" age threshold (days)
+    cyberSuggest: false,          // show suggested severity / domain (clearly marked, never saved)
+    cyberDefaultSheet: '',
+    cyberDomains: null,
+    cyberAuditTypes: null,
     csvProtect: true,
   };
   let current = Object.assign({}, DEFAULTS, TMD.ls.get('settings', {}));
@@ -125,7 +137,7 @@
       const sh = wb.sheets[name];
       out.sheets[name] = Object.assign({}, sh, {
         rows: sh.rows.map((r) => ({
-          id: r.id, sheet: r.sheet, rowNum: r.rowNum, values: r.values, dateHints: r.dateHints,
+          id: r.id, mod: r.mod, sheet: r.sheet, rowNum: r.rowNum, values: r.values, dateHints: r.dateHints,
           edited: r.edited, editedKeys: r.editedKeys, isNew: r.isNew, override: r.override, followUps: r.followUps,
         })),
       });
@@ -133,14 +145,17 @@
     return out;
   };
 
-  TMD.saveWorkingCopy = async function (slot) {
+  /** Save a module's working copy. slot e.g. 'working' / 'recovery' (tender) or 'cyber-working'. M defaults to Tender. */
+  TMD.saveWorkingCopy = async function (slot, M) {
     if (!TMD.settings.get('persistence')) return false;
-    const st = TMD.state;
+    const mod = M || (TMD.modules && TMD.modules.tender);
+    const st = mod ? mod.state : TMD.state;
+    if (!st.workbook) return false;
     const payload = {
       savedAt: Date.now(),
       workbook: TMD.serialiseWorkbook(st.workbook),
       activeSheets: st.activeSheets.slice(),
-      audit: TMD.audit ? TMD.audit.all() : [],
+      audit: mod ? mod.audit.all() : TMD.audit.all(),
       version: 1,
     };
     try { await TMD.idb.set(slot || 'working', payload); return true; }

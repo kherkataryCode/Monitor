@@ -6,16 +6,18 @@
 (function () {
   'use strict';
   const TMD = window.TMD;
-  let entries = [];
 
-  TMD.audit = {
+  /** Create an independent local audit log (one per module). */
+  TMD.createAuditLog = function (moduleId) {
+  let entries = [];
+  return {
     all: () => entries,
     load(list) { entries = Array.isArray(list) ? list : []; },
-    clear() { entries = []; TMD.emit('audit'); },
+    clear() { entries = []; TMD.emit('audit', { module: moduleId }); },
     /** {action, sheet, recordId, recordLabel, field, oldValue, newValue} */
     log(e) {
       const entry = Object.assign({
-        id: TMD.uid('a'), ts: Date.now(), sessionId: TMD.state.sessionId,
+        id: TMD.uid('a'), ts: Date.now(), sessionId: TMD.state.sessionId, module: moduleId,
         action: 'EDIT', sheet: '', recordId: '', recordLabel: '', rowNum: '', field: '', oldValue: '', newValue: '',
       }, e);
       ['oldValue', 'newValue'].forEach((k) => { if (entry[k] === null || entry[k] === undefined) entry[k] = ''; else if (typeof entry[k] !== 'string') entry[k] = String(entry[k]); });
@@ -35,4 +37,6 @@
         .concat((list || entries).map((e) => [new Date(e.ts).toLocaleString('en-IN'), e.sessionId, e.action, e.sheet, e.rowNum, e.recordLabel || e.recordId, e.field, e.oldValue, e.newValue]));
     },
   };
+  };
+  TMD.audit = TMD.createAuditLog('tender');
 })();

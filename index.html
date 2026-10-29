@@ -12,58 +12,66 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/table.css">
+  <link rel="stylesheet" href="css/modules.css">
   <link rel="stylesheet" href="css/print.css" media="print">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- ============ APPLICATION HEADER ============ -->
+  <!-- ============ APPLICATION HEADER (compact) ============ -->
   <header class="app-header" id="appHeader">
     <div class="hdr-left">
-      <button class="icon-btn nav-toggle" id="navToggle" aria-label="Toggle navigation" title="Toggle navigation"></button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="Show or hide the sidebar" title="Show / hide sidebar" aria-expanded="false" aria-controls="sideNav"></button>
       <img class="hdr-logo" id="hdrLogo" src="assets/logo-placeholder.svg" alt="Logo">
       <div class="hdr-titles">
-        <h1 class="hdr-title" id="hdrTitle">Tender Monitoring Dashboard</h1>
+        <h1 class="hdr-title" id="hdrTitle">Tender Monitoring</h1>
         <div class="hdr-meta" id="hdrMeta" aria-live="polite"></div>
       </div>
     </div>
     <div class="hdr-right">
-      <span class="privacy-pill" title="All processing happens inside this browser. No data is uploaded.">
-        <span class="dot"></span>Offline Mode: Data remains on this device.
+      <span class="privacy-pill" id="privacyPill" title="All processing happens inside this browser. No data is uploaded.">
+        <span class="dot"></span><span class="pp-text">Offline</span>
       </span>
-      <span class="mode-badge view" id="modeBadge" role="status"></span>
-      <div class="hdr-actions">
-        <button class="btn" id="btnImport" data-icon="upload">Import Data</button>
-        <button class="btn" id="btnRefresh" data-icon="refresh" title="Recalculate all indicators using today's date">Refresh</button>
-        <button class="btn" id="btnEdit" data-icon="edit">Edit</button>
-        <button class="btn primary edit-only" id="btnSave" data-icon="save" title="Save (Ctrl+S)">Save</button>
-        <button class="btn edit-only" id="btnCancelEdit" data-icon="x" title="Cancel Editing">Cancel Editing</button>
-        <div class="menu-wrap">
-          <button class="btn" id="btnExport" data-icon="download" aria-haspopup="true" title="Export / print">Export</button>
-        </div>
-        <button class="icon-btn" id="btnSettings" data-icon="settings" aria-label="Settings" title="Settings"></button>
-        <button class="icon-btn" id="btnTheme" data-icon="moon" aria-label="Toggle dark mode" title="Toggle dark mode"></button>
-      </div>
+      <button class="btn subtle" id="btnImport" data-icon="upload" title="Import an Excel or CSV file into the current module"><span class="hide-sm">Import</span></button>
+      <button class="btn subtle" id="btnExport" data-icon="download" aria-haspopup="true" title="Export / print"><span class="hide-sm">Export</span></button>
+      <button class="icon-btn" id="btnRefresh" data-icon="refresh" aria-label="Recalculate" title="Recalculate all indicators using today's date"></button>
+      <button class="icon-btn" id="btnTheme" data-icon="moon" aria-label="Toggle dark mode" title="Toggle light / dark mode"></button>
+      <button class="icon-btn" id="btnSettings" data-icon="settings" aria-label="Settings" title="Settings"></button>
     </div>
   </header>
 
-  <div class="demo-banner" id="demoBanner" hidden>
-    <strong>DEMONSTRATION DATA</strong> — the original workbook has not been loaded. Use <em>Import Data</em> to load <em>Tender Tracker v1.0.xlsx</em> or any .xlsx / .xls / .csv file.
-  </div>
+  <div class="demo-banner" id="demoBanner" hidden></div>
 
   <div class="app-body">
-    <!-- ============ NAVIGATION ============ -->
+    <!-- ============ NAVIGATION (rail by default, expands on demand) ============ -->
     <nav class="side-nav" id="sideNav" aria-label="Main navigation">
-      <ul>
-        <li><a href="#dashboard" data-page="dashboard" data-icon="grid">Dashboard</a></li>
-        <li><a href="#register" data-page="register" data-icon="table">Tender Register</a></li>
-        <li><a href="#timeline" data-page="timeline" data-icon="calendar">Timeline</a></li>
-        <li><a href="#analytics" data-page="analytics" data-icon="chart">Analytics</a></li>
-        <li><a href="#alerts" data-page="alerts" data-icon="bell">Alerts <span class="nav-count" id="navAlertCount"></span></a></li>
-        <li><a href="#quality" data-page="quality" data-icon="shield">Data Quality <span class="nav-count" id="navDqCount"></span></a></li>
-        <li><a href="#audit" data-page="audit" data-icon="history">Audit Log</a></li>
-        <li><a href="#settings" data-page="settings" data-icon="settings">Settings</a></li>
-      </ul>
+      <div class="nav-sec">
+        <div class="nav-h">Overview</div>
+        <a href="#home" data-page="home" data-icon="home" title="Home"><span class="nl">Home</span></a>
+      </div>
+      <div class="nav-sec">
+        <div class="nav-h">Tender Monitoring</div>
+        <a href="#dashboard" data-page="dashboard" data-icon="grid" title="Tender Dashboard"><span class="nl">Dashboard</span></a>
+        <a href="#register" data-page="register" data-icon="table" title="Tender Register"><span class="nl">Tender Register</span></a>
+        <a href="#timeline" data-page="timeline" data-icon="calendar" title="Timeline"><span class="nl">Timeline</span></a>
+        <a href="#analytics" data-page="analytics" data-icon="chart" title="Analytics"><span class="nl">Analytics</span></a>
+        <a href="#reports" data-page="reports" data-icon="report" title="Reports"><span class="nl">Reports</span></a>
+        <a href="#alerts" data-page="alerts" data-icon="bell" title="Tender Alerts"><span class="nl">Alerts</span><span class="nav-count" id="navAlertCount"></span></a>
+      </div>
+      <div class="nav-sec cyber">
+        <div class="nav-h">Cyber Security Audits</div>
+        <a href="#cyber" data-page="cyber" data-icon="shield" title="Cyber Audit Dashboard"><span class="nl">Cyber Audit Dashboard</span></a>
+        <a href="#cyber-register" data-page="cyber-register" data-icon="list" title="Audit Observation Register"><span class="nl">Observation Register</span></a>
+        <a href="#cyber-actions" data-page="cyber-actions" data-icon="target" title="Action Tracker"><span class="nl">Action Tracker</span><span class="nav-count" id="navCyberActCount"></span></a>
+        <a href="#cyber-analytics" data-page="cyber-analytics" data-icon="chart" title="Audit Analytics"><span class="nl">Audit Analytics</span></a>
+        <a href="#cyber-alerts" data-page="cyber-alerts" data-icon="bell" title="Audit Alerts"><span class="nl">Audit Alerts</span><span class="nav-count" id="navCyberAlertCount"></span></a>
+      </div>
+      <div class="nav-sec">
+        <div class="nav-h">System</div>
+        <a href="#quality" data-page="quality" data-icon="check" title="Data Quality"><span class="nl">Data Quality</span><span class="nav-count" id="navDqCount"></span></a>
+        <a href="#audit" data-page="audit" data-icon="history" title="Audit Log"><span class="nl">Audit Log</span></a>
+        <a href="#settings" data-page="settings" data-icon="settings" title="Settings"><span class="nl">Settings</span></a>
+      </div>
       <div class="nav-foot">
         <div class="nav-foot-line" id="navSheets"></div>
         <div class="nav-foot-line muted">Local, offline application. No server, cloud or telemetry.</div>
@@ -71,47 +79,45 @@
     </nav>
 
     <main id="main" class="main" tabindex="-1">
-      <!-- ============ STICKY FILTER BAR ============ -->
+      <!-- ============ STICKY FILTER BAR (one independent bar per module) ============ -->
       <section class="filter-bar" id="filterBar" aria-label="Filters">
-        <div class="fb-row">
-          <div class="search-box">
-            <span class="search-ico" data-icon="search"></span>
-            <input type="search" id="globalSearch" placeholder="Search all fields — PR, WBS, GeM ID, vendor, description, status…" aria-label="Global search" autocomplete="off">
-          </div>
-          <div class="seg" role="group" aria-label="Filter logic">
-            <button class="seg-btn active" data-logic="AND" title="Records must match every filter">AND</button>
-            <button class="seg-btn" data-logic="OR" title="Records may match any filter">OR</button>
-          </div>
-          <button class="btn subtle" id="btnAdvFilters" data-icon="filter" aria-expanded="false" aria-controls="advFilters">Advanced Filters <span class="pill-count" id="advFilterCount"></span></button>
-          <button class="btn subtle" id="btnPresets" data-icon="bookmark">Presets</button>
-          <button class="btn subtle" id="btnClearFilters" data-icon="x">Clear all</button>
-          <div class="fb-count" id="filterCount" aria-live="polite"></div>
-        </div>
-        <div class="chips" id="filterChips"></div>
-        <div class="adv-filters" id="advFilters" hidden></div>
+        <div class="fb-host" id="fbTender"></div>
+        <div class="fb-host" id="fbCyber" hidden></div>
       </section>
 
       <!-- ============ PAGES ============ -->
-      <section class="page" id="page-dashboard" data-title="Dashboard"></section>
+      <section class="page" id="page-home" data-title="Home"></section>
+      <section class="page" id="page-dashboard" data-title="Tender Dashboard"></section>
       <section class="page" id="page-register" data-title="Tender Register"></section>
       <section class="page" id="page-timeline" data-title="Timeline"></section>
       <section class="page" id="page-analytics" data-title="Analytics"></section>
+      <section class="page" id="page-reports" data-title="Reports"></section>
       <section class="page" id="page-alerts" data-title="Alerts"></section>
+      <section class="page cyber-page" id="page-cyber" data-title="Cyber Audit Dashboard"></section>
+      <section class="page cyber-page" id="page-cyber-register" data-title="Audit Observation Register"></section>
+      <section class="page cyber-page" id="page-cyber-actions" data-title="Action Tracker"></section>
+      <section class="page cyber-page" id="page-cyber-analytics" data-title="Audit Analytics"></section>
+      <section class="page cyber-page" id="page-cyber-alerts" data-title="Audit Alerts"></section>
       <section class="page" id="page-quality" data-title="Data Quality"></section>
       <section class="page" id="page-audit" data-title="Audit Log"></section>
       <section class="page" id="page-settings" data-title="Settings"></section>
     </main>
   </div>
 
+  <!-- ============ FLOATING EDIT CONTROL (bottom-left) ============ -->
+  <div class="edit-fab" id="editFab" role="region" aria-label="Editing"></div>
+
   <!-- ============ DRAWERS / OVERLAYS ============ -->
   <aside class="drawer" id="detailsDrawer" aria-label="Tender details" aria-hidden="true"></aside>
+  <aside class="drawer" id="cyberDrawer" aria-label="Audit observation details" aria-hidden="true"></aside>
   <aside class="drawer narrow" id="textDrawer" aria-label="Full text" aria-hidden="true"></aside>
   <div class="scrim" id="scrim" hidden></div>
+  <div class="nav-scrim" id="navScrim" hidden></div>
   <div class="modal-host" id="modalHost"></div>
   <div class="toast-host" id="toastHost" aria-live="polite"></div>
   <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
   <div class="popover-host" id="popoverHost"></div>
-  <div class="drop-overlay" id="dropOverlay" hidden><div>Drop .xlsx, .xls or .csv file to import locally</div></div>
+  <div class="drop-overlay" id="dropOverlay" hidden><div id="dropText">Drop .xlsx, .xls or .csv file to import locally</div></div>
   <div class="progress-overlay" id="progressOverlay" hidden>
     <div class="progress-card"><div class="spinner"></div><div id="progressText">Working…</div></div>
   </div>
@@ -129,19 +135,35 @@
   <script src="js/data-normaliser.js"></script>
   <script src="js/calculations.js"></script>
   <script src="js/sample-data.js"></script>
+  <script src="js/cyber-sample-data.js"></script>
   <script src="js/audit-log.js"></script>
+  <script src="js/modules.js"></script>
   <script src="js/data-loader.js"></script>
+  <!-- Cyber Security Audit module: data model, status engine, data quality -->
+  <script src="js/cyber-audit.js"></script>
+  <script src="js/cyber-audit-status.js"></script>
+  <script src="js/cyber-audit-quality.js"></script>
   <script src="js/filters.js"></script>
+  <script src="js/cyber-audit-filters.js"></script>
+  <script src="js/grid.js"></script>
   <script src="js/tender-table.js"></script>
+  <script src="js/cyber-audit-table.js"></script>
   <script src="js/details.js"></script>
   <script src="js/edit-mode.js"></script>
+  <script src="js/cyber-audit-loader.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/timeline.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/alerts.js"></script>
+  <script src="js/cyber-audit-dashboard.js"></script>
+  <script src="js/cyber-audit-analytics.js"></script>
+  <script src="js/cyber-audit-alerts.js"></script>
   <script src="js/data-quality.js"></script>
   <script src="js/export.js"></script>
+  <script src="js/cyber-audit-export.js"></script>
+  <script src="js/reports.js"></script>
+  <script src="js/home.js"></script>
   <script src="js/settings.js"></script>
   <script src="js/app.js"></script>
 </body>

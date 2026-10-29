@@ -120,6 +120,8 @@
           ${c.conflict ? `<div class="notice warn">${TMD.icon('alert')} <strong>Data conflict:</strong> ${esc(c.conflict)}</div>` : ''}
           <div class="f-row"><div class="f-label">Delay indicator</div><div class="f-val">${c.delayed ? `<span class="txt-red">${TMD.icon('clock')} Delayed</span>` : esc(c.delayLabel)}</div></div>
           <div class="f-row"><div class="f-label">Next suggested milestone</div><div class="f-val">${esc(c.next.label)}${c.next.date ? ' — ' + esc(TMD.fmtDate(c.next.date)) : ''}</div></div>
+          ${c.mgmt ? `<div class="f-row"><div class="f-label">Management status</div><div class="f-val"><span class="pill tone-${esc(c.mgmt.tone || 'grey')}">${esc(c.mgmt.name)}</span></div></div>` : ''}
+          ${fieldRow(rec, 'officer', edit)}${fieldRow(rec, 'statusRemark', edit)}${fieldRow(rec, 'nextActionDate', edit)}${fieldRow(rec, 'statusUpdated', edit)}
           ${fieldRow(rec, 'status', edit)}${fieldRow(rec, 'quickStatus', edit)}${fieldRow(rec, 'statusFlag', edit)}${fieldRow(rec, 'remarks', edit)}${fieldRow(rec, 'remarksAny', edit)}
           ${alerts.length ? `<div class="dr-alerts">${alerts.map((a) => `<div class="alert-line sev-${a.sev}">${TMD.icon(a.sev === 'high' ? 'alert' : 'clock')}<div><strong>${esc(a.type)}</strong><div>${esc(a.msg)}</div></div></div>`).join('')}</div>` : ''}
           ${c.dq.length ? `<details class="dr-dq"><summary>${TMD.icon('shield')} ${c.dq.length} data warning(s) · quality score ${c.dqScore}</summary><ul>${c.dq.map((q) => `<li class="sev-${q.sev}"><strong>${esc(q.field)}:</strong> ${esc(q.msg)} <span class="muted">— ${esc(q.suggestion)}</span></li>`).join('')}</ul></details>` : ''}
@@ -241,7 +243,7 @@
         if (current === rec) { TMD.$('#drBody').scrollTop = scroll; }
       }
     });
-    TMD.$('#scrim').addEventListener('click', hideAll);
+    TMD.$('#scrim').addEventListener('click', () => { hideAll(); if (TMD.cyber && TMD.cyber.details) TMD.cyber.details.close(); });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && (dr.classList.contains('open') || TMD.$('#textDrawer').classList.contains('open')) && !TMD.$('#modalHost').children.length && !TMD.grid.editor) hideAll();
     });
@@ -249,10 +251,10 @@
       if (e.target.closest('[data-a="close"]')) hideAll();
       if (e.target.closest('[data-a="copy"]')) TMD.table.copyText(TMD.$('#textDrawer .full-text').innerText);
       const o = e.target.closest('[data-a="open"]');
-      if (o && TMD._textRec) { const r = TMD._textRec; hideAll(); TMD.details.open(r); }
+      if (o && TMD._textRec) { const r = TMD._textRec; hideAll(); TMD.moduleOf(r).openDetails(r); }
     });
-    TMD.on('recalculated', () => { if (current && TMD.$('#detailsDrawer').classList.contains('open')) { if (TMD.state.records.indexOf(current) < 0) hideAll(); else { const s = TMD.$('#drBody') && TMD.$('#drBody').scrollTop; render(); if (s) TMD.$('#drBody').scrollTop = s; } } });
-    TMD.on('mode', () => { if (current) render(); });
+    TMD.on('recalculated', (e) => { if (e && e.module === 'cyber') return; if (current && TMD.$('#detailsDrawer').classList.contains('open')) { if (TMD.state.records.indexOf(current) < 0) hideAll(); else { const s = TMD.$('#drBody') && TMD.$('#drBody').scrollTop; render(); if (s) TMD.$('#drBody').scrollTop = s; } } });
+    TMD.on('mode', (e) => { if (e && e.module === 'cyber') return; if (current) render(); });
   };
 
   TMD.details = {

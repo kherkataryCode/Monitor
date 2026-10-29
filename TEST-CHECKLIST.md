@@ -3,7 +3,7 @@
 Tick each item when verified. “Sample” refers to files in `sample-data/`.
 
 ## A. Automated (run first)
-- [ ] Open `tests/self-test.html` → **50 passed, 0 failed** (date formats, serial dates, amounts, lakh/crore, identifiers, duplicate headers, header detection below merged title rows, mapping, status engine, demonstration-data results).
+- [ ] Open `tests/self-test.html` → **72 passed, 0 failed** (date formats, serial dates, amounts, lakh/crore, identifiers, duplicate headers, header detection below merged title rows, mapping, status engine, demonstration-data results, officer / follow-up columns, management status, Cyber Audit mapping, severity, overdue and status rules).
 
 ## B. Offline operation
 - [ ] Disconnect all networks (Wi-Fi off / cable out) **before** opening `index.html`.
@@ -92,3 +92,32 @@ Tick each item when verified. “Sample” refers to files in `sample-data/`.
 ## N. Browsers / platforms
 - [ ] Windows: Edge, Chrome, Firefox (current) — opened via double-click and via `start-server.bat`.
 - [ ] macOS: Safari, Chrome, Firefox (current) — opened via double-click and via `start-server.command`.
+
+## O. New UI (Apple-style), sidebar and edit button
+- [ ] Sidebar opens as an icon rail; the sidebar button shows / hides labels; the choice can be kept in Settings.
+- [ ] Light and dark appearance both readable (header, cards, grid, drawers, charts).
+- [ ] Bottom-left button reads *View only — Click to unlock editing*; unlocking shows Undo / Redo / Save / Lock and the unsaved-changes state.
+- [ ] Phone width (≈390 px): no horizontal page scroll; sidebar overlays content.
+
+## P. Excel-style editing (both registers)
+- [ ] Type into a cell after unlocking; value saved; amber corner shown.
+- [ ] Empty date cell editor is pre-filled with today; *Today* button works.
+- [ ] Fill handle: numbers / dates / “Item 1” continue as a series; Alt-drag copies; one Undo reverts the whole fill.
+- [ ] Paste a 3×3 range from Excel; Ctrl+D; Delete clears; right-click menu inserts rows above / below.
+- [ ] Header filter: value list, search, sort A→Z / Z→A, clear; toolbar shows the active column-filter count.
+
+## Q. Officer, status follow-up, management status, reports
+- [ ] Officer, Current Status Remark, Next Action Date and Status Updated On columns appear (marked +) and export with the data.
+- [ ] Changing STATUS stamps Status Updated On with today; a past Next Action Date raises an alert and appears under *Status follow-up*.
+- [ ] Rename / recolour / re-map a management status in Settings; dashboard board, filter and chart update.
+- [ ] Monthly, quarterly and FY reports render and export to Excel / HTML / Print.
+- [ ] Report generator: add / reorder / remove columns, group, sort, summary, template save / load; Excel and CSV outputs open in Excel.
+
+## R. Cyber Security Audits
+- [ ] Import `sample-data/Cyber Security Audit Tracker.xlsx` and `Cyber_Audit_Tracker.csv`; Tender data is unchanged.
+- [ ] Dashboard header, offline line, closure %, KPIs (click → filtered register), Management Attention, location and audit-wise views.
+- [ ] Closed observations are never overdue; revised target date takes precedence; original status shown next to calculated status.
+- [ ] Unlock editing (cyber text shown), edit cells, Quick Update saves locally, change history updated; tender edit mode unaffected.
+- [ ] Action Tracker categories, Alert Centre thresholds, 18 analytics charts.
+- [ ] Exports: register, filtered, open, overdue, closure report, management summary, action tracker, change log.
+- [ ] Data Quality and Audit Log pages switch between the two modules.

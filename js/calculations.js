@@ -136,7 +136,8 @@
   };
 
   /* ---------------- Record field access ---------------- */
-  TMD.sheetOf = (rec) => TMD.state.workbook && TMD.state.workbook.sheets[rec.sheet];
+  TMD.stateOf = (rec) => (rec && rec.mod === 'cyber' && TMD.cyber ? TMD.cyber.state : TMD.state);
+  TMD.sheetOf = (rec) => { const st = TMD.stateOf(rec); return st.workbook && st.workbook.sheets[rec.sheet]; };
   TMD.keyOf = (rec, f) => { const sh = TMD.sheetOf(rec); return sh ? sh.mapping[f] : undefined; };
   TMD.getStd = function (rec, f) {
     const k = TMD.keyOf(rec, f);
@@ -282,6 +283,10 @@
     const cr = TMD.normCapexRevex(rec, sheet);
     c.capexRevex = cr.value; c.capexRevexInferred = cr.inferred;
     c.initiator = s('initiator');
+    c.officer = s('officer');
+    c.statusRemark = s('statusRemark');
+    { const k = sheet.mapping.nextActionDate; c.nextAction = k ? (TMD.parseDate(rec.values[k], rec.dateHints[k], true).date || null) : null; }
+    { const k = sheet.mapping.statusUpdated; c.statusUpdated = k ? (TMD.parseDate(rec.values[k], rec.dateHints[k], true).date || null) : null; }
     c.vendor = s('vendor');
     c.nature = s('nature');
     c.ident = TMD.recIdent(rec);
@@ -323,7 +328,7 @@
     c.fy = TMD.fyOf(d.floatDate || d.prSentDate || d.awardDate);
 
     // ---- Stage engine ----
-    const statusText = [s('status'), s('quickStatus')].filter(Boolean).join('; ');
+    const statusText = [s('statusRemark'), s('status'), s('quickStatus')].filter(Boolean).join('; ');
     const remarksText = [s('remarks'), s('remarksAny')].filter(Boolean).join('; ');
     const tStatus = TMD.classifyText(statusText);
     const tRemarks = TMD.classifyText(remarksText);
@@ -373,6 +378,7 @@
     buildAlerts(rec, c, sheet);
     c.delayed = c.alerts.some((a) => a.delay);
     c.overdue = c.alerts.some((a) => a.overdue);
+    c.mgmt = TMD.mgmtStatusOf(c);
     c.delayLabel = c.closed ? (st === 22 ? 'Closed' : TMD.stageInfo(st).label) : c.delayed ? 'Delayed' : 'On track';
 
     // ---- Record-level data quality ----
@@ -453,6 +459,13 @@
     if (sheet.mapping.fat && (st === 16 || st === 17) && d.awardDate && !c.ms.fat.done && !c.ms.fat.na && db(d.awardDate, T) > g('thrFat')) A(c, 'medium', 'FAT overdue', `${db(d.awardDate, T)} days since award (${f(d.awardDate)}); FAT not recorded.`, { delay: true, overdue: true });
     if (st === 19 && c.ms.fat.date && db(c.ms.fat.date, T) > g('thrDelivery')) A(c, 'medium', 'Material delivery overdue', `${db(c.ms.fat.date, T)} days since FAT (${f(c.ms.fat.date)}); delivery/SAT not recorded.`, { delay: true, overdue: true });
     if ((st === 20 || st === 21) && c.ms.sat.date && !c.ms.installation.done && db(c.ms.sat.date, T) > g('thrInstall')) A(c, 'medium', 'Installation overdue', `${db(c.ms.sat.date, T)} days since SAT (${f(c.ms.sat.date)}); installation not recorded.`, { delay: true, overdue: true });
+    // Status follow-up (Next Action Date / Status Updated On columns)
+    if (c.nextAction) {
+      const left = db(T, c.nextAction);
+      if (left < 0) A(c, 'high', 'Status action date overdue', `Next action date ${f(c.nextAction)} passed ${-left} day(s) ago — check and update the current status.`, { overdue: true, date: c.nextAction, statusDue: true });
+      else if (left <= g('thrNextAction')) A(c, 'medium', 'Status action date due', `Next action due ${left === 0 ? 'today' : 'in ' + left + ' day(s)'} (${f(c.nextAction)}).`, { date: c.nextAction, upcoming: true, statusDue: true });
+    }
+    if (c.statusUpdated && db(c.statusUpdated, T) > g('thrStale')) A(c, 'medium', 'Status not updated recently', `Status last updated ${f(c.statusUpdated)} (${db(c.statusUpdated, T)} days ago) — check current status.`, { statusDue: true });
     // Planned milestones coming up (for timeline / KPI)
     [['prebidDate', 'Pre-bid meeting'], ['priceBidDate', 'Price bid'], ['tecApprovalDate', 'TEC approval'], ['floatDate', 'Tender floating']].forEach(([fld, lbl]) => {
       if (d[fld] && d[fld] > T && db(T, d[fld]) <= g('thrUpcoming')) c.alerts.push({ sev: 'low', type: 'Upcoming milestone', msg: `${lbl} on ${f(d[fld])}.`, date: d[fld], upcoming: true, silent: true });
@@ -620,6 +633,25 @@
     sheet.headers.filter((h) => h.dup).forEach((h) => { (dups[h.display] = dups[h.display] || []).push(h); });
     Object.keys(dups).forEach((lbl) => out.push({ sev: 'low', sheet: sheet.name, rowNum: hr, ident: 'Header row', field: lbl, msg: `Duplicate source header "${lbl}" in columns ${dups[lbl].map((h) => TMD.colLetter(h.index)).join(', ')}`, suggestion: `Both are kept (internal keys ${dups[lbl].map((h) => h.key).join(', ')}). Assign friendly labels in Settings if helpful.`, code: 'dup-header' }));
     return out;
+  };
+
+  /* ---------------- Management status (configurable in Settings) ---------------- */
+  TMD.DEFAULT_MGMT = [
+    { id: 'pre', name: 'Pre-Tender', tone: 'grey', stages: [1, 2, 3, 4] },
+    { id: 'tendering', name: 'Under Tendering', tone: 'teal', stages: [5, 6, 7] },
+    { id: 'evaluation', name: 'Under Evaluation', tone: 'purple', stages: [8, 9, 10, 11, 12, 13] },
+    { id: 'award', name: 'Award Stage', tone: 'blue', stages: [14, 15] },
+    { id: 'execution', name: 'Under Execution', tone: 'green', stages: [16, 17, 18, 19, 20, 21] },
+    { id: 'completed', name: 'Completed', tone: 'green', stages: [22] },
+    { id: 'dropped', name: 'On Hold / Dropped', tone: 'red', stages: [23, 24, 25] },
+    { id: 'attention', name: 'Needs Attention', tone: 'orange', stages: [26, 27] },
+  ];
+  TMD.mgmtStatuses = () => { const v = TMD.settings.get('mgmtStatuses'); return Array.isArray(v) && v.length ? v : TMD.DEFAULT_MGMT; };
+  TMD.mgmtStatusOf = function (c) {
+    const list = TMD.mgmtStatuses();
+    const rule = TMD.settings.get('mgmtDelayedTo');
+    if (rule && c.delayed && !c.closed) { const r = list.find((x) => x.id === rule); if (r) return r; }
+    return list.find((x) => x.stages.indexOf(c.stage) >= 0) || { id: 'other', name: 'Unassigned', tone: 'grey', stages: [] };
   };
 
   /* ---------------- Recalculate everything ---------------- */

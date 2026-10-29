@@ -9,7 +9,7 @@
 .sel-count { font-size: 12.5px; padding: 0 6px; }
 .reg-foot { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); padding: 6px 2px 0; }
 
-.grid { --rh: 30px; position: relative; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); overflow: hidden; height: 520px; }
+.grid { --rh: 44px; position: relative; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); overflow: hidden; height: 520px; }
 .grid-viewport { position: absolute; inset: 0; overflow: auto; outline: none; overscroll-behavior: contain; }
 .grid-viewport:focus-visible { box-shadow: inset 0 0 0 2px var(--focus); }
 .grid-head { position: sticky; top: 0; z-index: 6; }
@@ -19,15 +19,15 @@
 
 .g-row { position: absolute; left: 0; display: flex; height: var(--rh); }
 .grid-head .g-row { position: relative; height: auto; }
-.g-hrow { min-height: 38px; align-items: stretch; }
-.grid-head .g-hrow .g-cell { height: auto; min-height: 38px; }
+.g-hrow { min-height: 44px; align-items: stretch; }
+.grid-head .g-hrow .g-cell { height: auto; min-height: 44px; }
 .g-cell {
-  flex: none; height: 100%; padding: 0 8px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-  border-right: 1px solid var(--grid); border-bottom: 1px solid var(--grid); background: var(--surface); font-size: 12.5px; position: relative;
+  flex: none; height: 100%; padding: 0 12px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  border-right: 1px solid var(--grid); border-bottom: 1px solid var(--grid); background: var(--surface); font-size: 13px; position: relative;
 }
 .g-cell > span.tx, .g-cell > span { overflow: hidden; text-overflow: ellipsis; }
 .g-cell.right { justify-content: flex-end; font-variant-numeric: tabular-nums; }
-.g-row.odd .g-cell { background: color-mix(in srgb, var(--surface-2) 55%, var(--surface)); }
+.g-row.odd .g-cell { background: var(--surface-2); }
 .g-row:hover .g-cell { background: color-mix(in srgb, var(--primary-soft) 55%, var(--surface)); }
 .g-row.sel .g-cell { background: color-mix(in srgb, var(--primary-soft) 90%, var(--surface)); }
 .g-frozen { position: sticky; z-index: 2; }
@@ -40,7 +40,7 @@
 .g-row.edited .g-hash { box-shadow: inset 3px 0 0 var(--tone-amber); }
 
 /* header */
-.g-hcell { background: var(--surface-2); font-weight: 600; color: var(--text-2); font-size: 12px; cursor: pointer; user-select: none; white-space: normal; line-height: 1.2; align-items: center; padding-right: 14px; border-bottom: 1px solid var(--border-strong); }
+.g-hcell { background: var(--surface-2); font-weight: 600; color: var(--text-2); font-size: 12px; cursor: pointer; user-select: none; white-space: normal; line-height: 1.25; align-items: center; padding-right: 30px; border-bottom: 1px solid var(--border-strong); }
 .grid-head .g-cell.g-sys { background: var(--surface-2); border-bottom: 1px solid var(--border-strong); }
 .g-hcell .h-label { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .g-hcell:hover { color: var(--text-1); background: var(--surface-3); }
@@ -58,7 +58,7 @@ body.col-resizing { cursor: col-resize; user-select: none; }
 
 /* cell content */
 .clamp { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: zoom-in; width: 100%; }
-.grid.wrap .g-cell { white-space: normal; align-items: flex-start; padding-top: 4px; line-height: 1.3; }
+.grid.wrap .g-cell { white-space: normal; align-items: flex-start; padding-top: 8px; line-height: 1.35; }
 .grid.wrap .clamp, .grid.wrap .tx { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .grid.wrap .g-sys { align-items: center; padding-top: 0; }
 .cell-serial sup { font-size: 8.5px; color: var(--p-fg); margin-left: 2px; text-transform: uppercase; }
@@ -88,3 +88,54 @@ body.table-full .app-body { height: 100vh; }
 body.table-full #page-register { padding: 10px 12px 4px; }
 .g-hash .edited-dot { font-size: 0; width: 8px; height: 8px; border-radius: 50%; padding: 0; background: var(--tone-amber); flex: none; }
 .g-spacer { flex: none; height: 100%; }
+
+/* ---------- Excel-style header filters ---------- */
+.h-filter { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; opacity: 0; transition: opacity .12s; z-index: 4; }
+.h-filter .ico { width: 13px; height: 13px; }
+.g-hcell:hover .h-filter, .h-filter:focus-visible, .h-filter.on { opacity: 1; }
+.h-filter:hover { background: var(--border); color: var(--text-1); }
+.h-filter.on { background: var(--primary); color: #fff; }
+.hf-popover { padding: 10px; }
+.hf-pop { display: flex; flex-direction: column; gap: 8px; width: 290px; }
+.hf-title { font-weight: 600; font-size: 13px; padding: 0 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hf-sort { display: flex; gap: 4px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.hf-sort .btn { flex: 1; justify-content: center; }
+.hf-all { border-bottom: 1px solid var(--grid); border-radius: 0; }
+.hf-foot { display: flex; gap: 6px; align-items: center; border-top: 1px solid var(--border); padding-top: 8px; }
+.hf-foot .sp { flex: 1; }
+
+/* ---------- Toolbar ---------- */
+.reg-toolbar { margin-bottom: 12px; }
+.tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+.icon-btn.on { background: var(--primary-soft); color: var(--primary); }
+.edit-tools { background: var(--a-bg); padding: 3px 8px; border-radius: 12px; }
+.edit-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: var(--a-fg); padding: 0 6px 0 2px; }
+.edit-chip .ico { width: 14px; height: 14px; }
+.sel-tools { border-radius: 12px; padding: 3px 8px; }
+.row-chk, .sel-all { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+.g-hcell.added .h-label::after { content: " +"; color: var(--a-fg); font-weight: 700; }
+
+/* ---------- Edit mode: in-cell editing, fill handle ---------- */
+.grid.editing .g-cell.editable { background-image: none; cursor: cell; }
+.grid.editing .g-cell.editable:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent); }
+.grid.editing { border-color: color-mix(in srgb, var(--tone-amber) 70%, var(--border)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone-amber) 18%, transparent); }
+.g-cell.in-range { background: color-mix(in srgb, var(--primary) 12%, var(--surface)) !important; }
+.g-cell.focus { box-shadow: inset 0 0 0 2px var(--primary); z-index: 3; overflow: visible; }
+.fill-handle { position: absolute; right: -4px; bottom: -4px; width: 9px; height: 9px; background: var(--primary); border: 2px solid var(--surface); border-radius: 2px; cursor: crosshair; z-index: 5; }
+.fill-handle:hover { transform: scale(1.25); }
+.g-cell.fill-target { background: color-mix(in srgb, var(--primary) 8%, var(--surface)) !important; box-shadow: inset 0 0 0 1px var(--primary); }
+body.filling, body.filling * { cursor: crosshair !important; user-select: none; }
+.cell-overdue { color: var(--r-fg); font-weight: 600; }
+.cell-soon { color: var(--a-fg); font-weight: 600; }
+
+/* Cell editor (in place) */
+.cell-editor { position: fixed; z-index: 120; background: var(--surface); border: 2px solid var(--primary); border-radius: 10px; box-shadow: var(--shadow-3); padding: 5px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.cell-editor .inp { height: 32px; min-width: 140px; flex: 1; }
+.cell-editor.date .inp[type=date] { flex: 0 0 160px; }
+.cell-editor .btn { height: 30px; }
+.ce-hint { width: 100%; font-size: 11px; color: var(--text-3); padding: 0 3px; }
+
+/* full screen */
+body.table-full .edit-fab { bottom: 14px; }
+#page-cyber-register { padding-bottom: 6px; }
+body.table-full #page-cyber-register { padding: 10px 12px 4px; }

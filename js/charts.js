@@ -71,7 +71,7 @@
     const def = registry[id];
     if (!L || !def) return;
     L.dirty = false;
-    const recs = TMD.state.filtered;
+    const recs = def.module === 'cyber' ? TMD.cyber.state.filtered : TMD.state.filtered;
     let data;
     try { data = def.build(recs); } catch (e) { console.error('chart', id, e); data = { labels: [], datasets: [] }; }
     L.data = data;
@@ -201,6 +201,8 @@
     return { keys: out, labels: out.map(TMD.monthLabel), counts: out.map((k) => m.get(k) || 0) };
   }
 
+  TMD.chartHelpers = { topN, months: (recs, getDate) => months(recs, getDate), tone: (t) => tone(t), SERIES: () => SERIES(), bucket };
+
   /* ---------------- Chart definitions (15) ---------------- */
   const D = TMD.charts.define;
   D('stage', { title: 'Tender count by current stage', subtitle: 'Calculated lifecycle stage', type: 'bar', horizontal: true, height: 420, wide: false, catLabel: 'Stage',
@@ -297,6 +299,40 @@
       const colors = { Completed: tone('green'), 'In progress': tone('blue'), 'On hold': tone('amber'), 'Cancelled / scrapped': tone('red'), 'Needs review': tone('grey') };
       return { labels, datasets: [{ label: 'Tenders', data: labels.map((k) => g[k]), colors: labels.map((k) => colors[k]) }] };
     }, filter: (l) => { const map = { Completed: 'completed', 'In progress': 'pending', 'On hold': 'closedExc', 'Cancelled / scrapped': 'closedExc' }; if (map[l]) TMD.filters.set('completion', map[l]); } });
+
+  // Management view (configurable management statuses) and CAPEX / REVEX comparison
+  D('mgmt', { title: 'Management status', subtitle: 'Configurable in Settings → Management status', type: 'bar', horizontal: true, height: 260, catLabel: 'Management status',
+    build: (recs) => {
+      const list = TMD.mgmtStatuses();
+      const m = TMD.groupCount(recs, (r) => (r.calc.mgmt ? r.calc.mgmt.name : 'Unassigned'));
+      const rows = list.filter((x) => m.get(x.name)).concat(m.get('Unassigned') ? [{ name: 'Unassigned', tone: 'grey' }] : []);
+      return { labels: rows.map((x) => x.name), datasets: [{ label: 'Tenders', data: rows.map((x) => m.get(x.name)), colors: rows.map((x) => tone(x.tone)) }] };
+    }, filter: (l) => { if (l !== 'Unassigned') addFilter('mgmt', l); } });
+  D('capexRevexStatus', { title: 'CAPEX vs REVEX by management status', type: 'bar', stacked: true, height: 260, catLabel: 'Management status',
+    build: (recs) => {
+      const list = TMD.mgmtStatuses().filter((x) => recs.some((r) => r.calc.mgmt && r.calc.mgmt.id === x.id));
+      const heads = ['CAPEX', 'REVEX'];
+      const other = recs.some((r) => heads.indexOf(r.calc.capexRevex) < 0);
+      const ds = heads.map((h, i) => ({ label: h, data: list.map((x) => recs.filter((r) => r.calc.capexRevex === h && r.calc.mgmt && r.calc.mgmt.id === x.id).length), color: SERIES()[i === 0 ? 0 : 2] }));
+      if (other) ds.push({ label: 'Not stated', data: list.map((x) => recs.filter((r) => heads.indexOf(r.calc.capexRevex) < 0 && r.calc.mgmt && r.calc.mgmt.id === x.id).length), color: tone('grey') });
+      return { labels: list.map((x) => x.name), datasets: ds };
+    }, filter: (l) => addFilter('mgmt', l) });
+  D('capexRevexValue', { title: 'CAPEX vs REVEX value', subtitle: 'Estimated (or project) cost and awarded value', type: 'bar', money: true, height: 260, catLabel: 'Budget head',
+    build: (recs) => {
+      const s = amountScale();
+      const heads = ['CAPEX', 'REVEX'];
+      const est = heads.map((h) => recs.filter((r) => r.calc.capexRevex === h).reduce((a, r) => a + ((r.calc.estRupees !== null ? r.calc.estRupees : r.calc.projectRupees) || 0), 0));
+      const aw = heads.map((h) => recs.filter((r) => r.calc.capexRevex === h && r.calc.awarded).reduce((a, r) => a + (r.calc.awardedRupees || 0), 0));
+      const r2 = (v) => Math.round(v / s.div * 100) / 100;
+      return { labels: heads, datasets: [{ label: 'Estimated / project cost', data: est.map(r2), color: SERIES()[0] }, { label: 'Awarded value', data: aw.map(r2), color: SERIES()[2] }] };
+    }, filter: (l) => addFilter('capexRevex', l) });
+  D('officerLoad', { title: 'Open tenders by officer', subtitle: 'Not completed, cancelled or scrapped', type: 'bar', horizontal: true, catLabel: 'Officer',
+    build: (recs) => {
+      const with_ = recs.filter((r) => TMD.hasStd(r, 'officer'));
+      if (!with_.length) return { labels: [], datasets: [{ data: [] }], emptyText: 'No Officer column yet — unlock editing and use “Column” to add one, or map it in Settings' };
+      const t = topN(TMD.groupCount(with_.filter((r) => !r.calc.closed), (r) => blank(r.calc.officer)), 10);
+      return { labels: t.map((x) => x[0]), datasets: [{ label: 'Open tenders', data: t.map((x) => x[1]), color: SERIES()[6] }] };
+    }, filter: (l) => { if (l !== 'Other') addFilter('officer', l); } });
 
   // Analytics-only charts
   D('stageGroup', { title: 'Pipeline by tender stage group', type: 'bar', catLabel: 'Stage group',

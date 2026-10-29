@@ -1,6 +1,11 @@
 # Tender Monitoring Dashboard (offline)
 
-A management-grade, **fully offline** dashboard for monitoring CAPEX / REVEX procurement, tendering, evaluation, award and post-award activities (BPCL Pipelines-style tender trackers).
+A management-grade, **fully offline** dashboard with two independent modules:
+
+* **Tender Monitoring** — CAPEX / REVEX procurement, tendering, evaluation, award and post-award activities (BPCL Pipelines-style tender trackers).
+* **Cyber Security Audits** — audit observations, remediation, evidence, verification and closure tracking (internal, C-DAC, VAPT, OT/ICS assessments, …).
+
+Each module keeps its own data source, filters, edit mode, change log and exports. Importing into one never replaces the other.
 
 It runs entirely inside your web browser. The imported Excel / CSV file is the local source of truth. There is no server, cloud database, login, API, CDN, analytics or telemetry. A Content Security Policy blocks all network connections (`connect-src 'none'`).
 
@@ -13,8 +18,9 @@ It runs entirely inside your web browser. The imported Excel / CSV file is the l
 ### Option A — just open it (Windows and macOS)
 1. Unzip the `tender-monitoring-dashboard` folder anywhere (e.g. Documents).
 2. Double-click **`index.html`**. It opens in your default browser (Chrome, Edge, Firefox or Safari — current versions).
-3. The app starts in **VIEW MODE** with built-in **DEMONSTRATION DATA**.
-4. Click **Import Data**, then choose (or drag in) `sample-data/Tender Tracker v1.0.xlsx` or your own `.xlsx`, `.xls` or `.csv`.
+3. The app opens on **Home** in **View Mode** with built-in **DEMONSTRATION DATA** for both modules.
+4. Open a module from the sidebar (a slim icon rail — click the sidebar button at the top-left to expand it), click **Import**, then choose (or drag in) `sample-data/Tender Tracker v1.0.xlsx`, `sample-data/Cyber Security Audit Tracker.xlsx` or your own `.xlsx`, `.xls` or `.csv`.
+5. To change data, click the highlighted **View only — Click to unlock editing** button at the bottom-left, then edit directly in the cells.
 
 ### Option B — small local server (optional, recommended for very large files)
 A local server lets the browser parse large workbooks in a background Web Worker (browsers block workers for pages opened from `file://`). It is still 100 % local: the server listens on `127.0.0.1` only.
@@ -37,12 +43,18 @@ If Python is not available, use Option A — every feature works; large files ar
 | **Source fidelity** | All columns, labels and order preserved; blank cells retained; duplicate headers (e.g. the two **PR No** columns) kept as `PR_No_1` / `PR_No_2` internally while the original header text is shown and exported; identifiers (PR, CRFQ / GeM, PO / OLA, WBS) kept as text, never scientific notation; title rows above the header preserved for export. |
 | **Mapping layer** | Each worksheet keeps its own structure (Capex, Capex Modified, REVEX 2026, Sheet3 / Contract Monitoring, others). A configurable mapping links columns to standard analytical fields; unmapped columns stay visible. Compatible sheets can be consolidated. |
 | **Status engine** | 27 lifecycle stages; structured dates first, STATUS / Quick Status / Remarks as supporting evidence; shows the **reason**; flags **Data Conflict** instead of silently choosing; manual override in Edit Mode. |
-| **Dashboard** | 30 clickable KPI cards (each applies its filter to the Tender Register), attention lists and 15 interactive charts (click to filter, table view for accessibility). |
+| **Design** | Apple-inspired, uncluttered UI with light / dark appearance; sidebar collapsed to an icon rail by default; compact header; translucent sticky filter bar; comfortable row height by default. |
+| **Dashboard** | Headline tiles (total, in progress, awarded, delayed, status follow-ups), **CAPEX / REVEX** comparison (counts, open, awarded, delayed, estimated and awarded value), configurable **Management status** board, attention / follow-up / next-14-days lists, all 30 clickable KPI cards and 18 interactive charts (management status, CAPEX vs REVEX by status and by value, officer workload, …). |
+| **Officer & status follow-up** | *Officer*, *Current Status Remark*, *Next Action Date* and *Status Updated On* columns are recognised in source files or added automatically (app-added columns, exported with the data). Changing status / remark stamps *Status Updated On* with today. Alerts flag overdue / due next actions and statuses not updated recently. |
+| **Management status** | A configurable grouping of the 27 calculated stages (names, colours, stage mapping, “delayed tenders shown as …”) in Settings. |
+| **Reports** | Monthly / quarterly / financial-year report (floated, opened, evaluated, awarded, completed, delayed, CAPEX vs REVEX, by department, by management status) and a **report generator** with selectable and re-orderable columns, grouping, sorting, summary and saved templates — Excel, CSV, HTML and Print / PDF. |
 | **Tender Register** | Virtualised grid for thousands of rows: sticky header, frozen columns (0–4), resize, drag-to-reorder, show/hide, multi-sort, per-column search, wrap, density, grouping, selection, cell-range copy, keyboard navigation, print view, full screen; layouts remembered locally. |
+| **Excel-like editing** | Unlock first via the floating button. Then type directly into a cell (or double-click / Enter), date cells open a date picker that defaults to **today**, drag the **fill handle** to copy or continue a series (numbers, dates, “Item 1 → Item 2”; Alt / Option = copy), paste ranges from Excel, Ctrl+D fill down, Delete to clear, right-click menu (insert row above / below, duplicate, delete, add column), **filter and sort from every column header**. |
 | **Edit Mode** | Explicit, confirmed. Inline and drawer editing with date pickers, number inputs, dropdowns and multi-line editors; validation; undo / redo; add / duplicate / delete rows; “Edited” markers; local audit log; Save Locally (IndexedDB), Export Updated Excel, Export CSV; Cancel with Discard / Continue / Save & exit; automatic recovery of unsaved sessions. |
 | **Timeline** | Upcoming & overdue milestones, monthly calendar, Gantt view, lifecycle pipeline. |
 | **Alerts** | Calculated from the system date with configurable thresholds (shown only inside the app — no e-mail / SMS). |
 | **Data Quality** | 30+ checks with severity, worksheet, row, identifier, field, problem and suggested correction (suggestions never change data). |
+| **Cyber Security Audits** | Own dashboard (“Cyber Security Audit Monitoring”), 17 clickable KPIs, closure progress, Management Attention list, location and audit-wise views; Audit Observation Register (same Excel-like grid); Action Tracker (immediate attention, due this week / month, overdue, awaiting evidence / verification / closure, no owner, no target); Alert Centre with configurable thresholds; 18 analytics charts; Quick Update form; remediation timeline (Raised → Action Plan → Remediation → Evidence → Verification → Closure); 16-status calculated lifecycle that keeps the original status; overdue and ageing (0–30 … >365 days); severity colours; data-quality checks; exports (register, filtered, open, overdue, closure report, management summary, action tracker, change log). Flexible column mapping — no column is mandatory and nothing is invented: framework references and severities are never assumed (optional “Suggested” values are clearly marked and never saved). |
 | **Export** | Full / filtered / selected rows to Excel (original sheets, headers and order preserved, edits included, optional calculated columns, Dashboard Summary, Data Quality Report, Audit Log); CSV; audit CSV; print dashboard / details; printable & downloadable management summary; PDF via the browser’s **Print → Save as PDF**. |
 
 ---
@@ -52,9 +64,13 @@ If Python is not available, use Option A — every feature works; large files ar
 ```
 tender-monitoring-dashboard/
 ├── index.html                 Application shell (+ local CSP)
-├── css/   styles.css · dashboard.css · table.css · print.css
+├── css/   styles.css · dashboard.css · table.css · modules.css · print.css
 ├── js/
-│   ├── app.js                 Bootstrapping, routing, header, import dialog, recovery
+│   ├── app.js                 Bootstrapping, module-aware routing, header, edit button, import, recovery
+│   ├── modules.js             Registry of the independent modules (Tender, Cyber Audit)
+│   ├── grid.js                Reusable Excel-like virtualised grid (both registers)
+│   ├── home.js                Home page (module cards)
+│   ├── reports.js             Monthly / quarterly reports and report generator
 │   ├── utils.js               Namespace, escaping, formatting, modal/toast/popover/tooltip
 │   ├── icons.js               Inline SVG icon set (local)
 │   ├── storage.js             IndexedDB + localStorage, settings
@@ -73,12 +89,18 @@ tender-monitoring-dashboard/
 │   ├── export.js              Excel/CSV export, printing, management summary
 │   ├── settings.js            Settings page + Audit Log page
 │   ├── audit-log.js           Local audit log
-│   └── sample-data.js         Built-in DEMONSTRATION DATA
+│   ├── sample-data.js         Built-in DEMONSTRATION DATA (tenders)
+│   ├── cyber-sample-data.js   Built-in DEMONSTRATION DATA (audit observations)
+│   └── cyber-audit*.js        Cyber Security Audit module: mapping/model, status engine,
+│                              data quality, loader + drawer, filters, register, dashboard,
+│                              analytics, action tracker + alerts, export
 ├── lib/                       Third-party libraries (local copies) + licences
 ├── assets/                    Logo placeholder, icons
 ├── sample-data/
 │   ├── Tender Tracker v1.0.xlsx   Demonstration workbook (9 worksheets)
 │   ├── tender-sample.csv          Demonstration CSV (Capex layout)
+│   ├── Cyber Security Audit Tracker.xlsx   Demonstration audit workbook
+│   ├── Cyber_Audit_Tracker.csv    Demonstration audit CSV
 │   └── data-dictionary.json       Columns, standard fields, calculated fields, stages
 ├── tests/self-test.html       Offline automated self-test (open in a browser)
 ├── tools/                     Node scripts to regenerate the samples / dictionary (optional)
@@ -111,7 +133,7 @@ Fonts: the system UI font is used (Segoe UI on Windows, SF Pro on macOS). No web
 * All spreadsheet content is treated as untrusted. It is HTML-escaped before rendering, and `eval` and dynamic code are not used.
 * File extension, size and content signature are validated (ZIP for `.xlsx`, OLE / XML for `.xls`, text for `.csv`).
 * CSV exports can prefix cells starting with `= + - @` to prevent formula injection (on by default).
-* Local persistence (optional, Settings): the working copy, recovery data and audit log are kept in this browser’s IndexedDB; settings, layouts and presets in localStorage. Use **Settings → Clear local working data / Clear audit history / Reset application**.
+* Local persistence (optional, Settings): the working copy, recovery data and audit log of **each module** are kept separately in this browser’s IndexedDB; settings, layouts and presets in localStorage. Use **Settings → Clear local working data / Clear audit history / Reset application**.
 * The audit log is a local convenience log. It is **not** tamper-proof and not equivalent to an enterprise audit system.
 
 ---
@@ -130,11 +152,11 @@ Fonts: the system UI font is used (Segoe UI on Windows, SF Pro on macOS). No web
 
 ## 7. Testing
 
-* Open **`tests/self-test.html`** in a browser: it runs 50 offline checks of date parsing, amounts, identifiers, duplicate headers, header detection, mapping, the status engine and demonstration-data results.
+* Open **`tests/self-test.html`** in a browser: it runs 72 offline checks of date parsing, amounts, identifiers, duplicate headers, header detection, mapping, the status engine, demonstration-data results, the officer / follow-up columns, management status and the Cyber Security Audit engine (mapping, severity, overdue, status).
 * Follow **`TEST-CHECKLIST.md`** for the manual acceptance checklist (import, edit, export / re-import, offline verification, etc.).
 
 ## 8. Regenerating samples (optional, developers)
-With Node.js installed: `node tools/build-samples.js` (rebuilds the sample workbook and CSV from `js/sample-data.js`) and `node tools/build-data-dictionary.js`. Neither script needs network access.
+With Node.js installed: `node tools/build-samples.js` (rebuilds the sample workbooks and CSVs from `js/sample-data.js` and `js/cyber-sample-data.js`) and `node tools/build-data-dictionary.js`. Neither script needs network access.
 
 ---
 **All sample records are fictitious DEMONSTRATION DATA.**
